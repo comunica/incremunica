@@ -77,7 +77,7 @@
     "rdf-terms": "^2.0.0",
     "readable-stream": "^4.3.0",
     "sparqlalgebrajs": "^4.3.8",
-    "streamify-array": "^1.0.1",
+    "streamify-array": "^2.0.0",
     "ts-jest": "^29.0.0",
     "ts-loader": "^9.4.1",
     "typedoc": "^0.28.0",
