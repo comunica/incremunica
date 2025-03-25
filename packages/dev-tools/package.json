@@ -1,13 +1,13 @@
 {
   "name": "@incremunica/dev-tools",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Development tools for comunica/incremunica.",
   "lsd:module": true,
   "license": "MIT",
   "homepage": "https://github.com/comunica",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/dev-tools"
   },
   "bugs": {
@@ -49,9 +49,9 @@
     "@comunica/mediator-race": "^4.1.0",
     "@comunica/types": "^4.1.0",
     "@comunica/utils-bindings-factory": "^4.1.0",
-    "@incremunica/actor-merge-bindings-context-is-addition": "^2.2.0",
-    "@incremunica/context-entries": "^2.2.0",
-    "@incremunica/types": "^2.2.0",
+    "@incremunica/actor-merge-bindings-context-is-addition": "^2.2.1",
+    "@incremunica/context-entries": "^2.2.1",
+    "@incremunica/types": "^2.2.1",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",
     "imurmurhash": "^0.1.4",

@@ -1,13 +1,13 @@
 {
   "name": "@incremunica/streaming-store",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An RDF Store where the match function gives a stream.",
   "lsd:module": true,
   "license": "MIT",
   "homepage": "https://github.com/comunica",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/incremental-rdf-streaming-store"
   },
   "bugs": {
@@ -47,6 +47,6 @@
     "readable-stream": "^4.3.0"
   },
   "devDependencies": {
-    "@incremunica/types": "^2.2.0"
+    "@incremunica/types": "^2.2.1"
   }
 }

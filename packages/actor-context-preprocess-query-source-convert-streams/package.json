@@ -1,17 +1,17 @@
 {
   "name": "@incremunica/actor-context-preprocess-query-source-convert-streams",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A Context Preprocess actor that converts all streams in the query sources to AsyncIterators and puts them in an object.",
   "lsd:module": true,
   "license": "MIT",
-  "homepage": "https://maartyman.github.io/incremunica/",
+  "homepage": "https://comunica.github.io/incremunica/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/actor-context-preprocess-query-source-convert-streams"
   },
   "bugs": {
-    "url": "https://github.com/maartyman/incremunica/issues"
+    "url": "https://github.com/comunica/incremunica/issues"
   },
   "keywords": [
     "incremunica",

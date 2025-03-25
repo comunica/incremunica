@@ -1,17 +1,17 @@
 {
   "name": "@incremunica/bus-source-watch",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An incremunica bus for source-watch events.",
   "lsd:module": true,
   "license": "MIT",
-  "homepage": "https://maartyman.github.io/incremunica/",
+  "homepage": "https://comunica.github.io/incremunica/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/bus-source-watch"
   },
   "bugs": {
-    "url": "https://github.com/maartyman/incremunica/issues"
+    "url": "https://github.com/comunica/incremunica/issues"
   },
   "keywords": [
     "incremunica",
@@ -37,6 +37,6 @@
   },
   "dependencies": {
     "@comunica/core": "^4.1.0",
-    "@incremunica/types": "^2.2.0"
+    "@incremunica/types": "^2.2.1"
   }
 }

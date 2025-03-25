@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/%40incremunica%2Fconfig-query-sparql-incremental.svg)](https://www.npmjs.com/package/@incremunica/config-query-sparql-incremental)
 
-The default configuration files for [Incremunica SPARQL Incremental](https://github.com/maartyman/incremental/tree/master/packages/incremental#readme).
+The default configuration files for [Incremunica SPARQL Incremental](https://github.com/comunica/incremunica/tree/master/engines/query-sparql-incremental).
 
 ## Installation
 

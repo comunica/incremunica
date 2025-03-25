@@ -1,16 +1,16 @@
 {
   "name": "@incremunica/jest",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Jest utilities for incremunica",
   "license": "MIT",
-  "homepage": "https://maartyman.github.io/incremunica/",
+  "homepage": "https://comunica.github.io/incremunica/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/jest"
   },
   "bugs": {
-    "url": "https://github.com/maartyman/incremunica/issues"
+    "url": "https://github.com/comunica/incremunica/issues"
   },
   "keywords": [
     "jest",
@@ -39,7 +39,7 @@
   "dependencies": {
     "@comunica/types": "^4.1.0",
     "@comunica/utils-bindings-factory": "^4.1.0",
-    "@incremunica/context-entries": "^2.2.0",
+    "@incremunica/context-entries": "^2.2.1",
     "@rdfjs/types": "*",
     "arrayify-stream": "^3.0.0"
   }

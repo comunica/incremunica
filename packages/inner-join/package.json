@@ -1,17 +1,17 @@
 {
   "name": "@incremunica/inner-join",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An inner-join base class",
   "lsd:module": true,
   "license": "MIT",
-  "homepage": "https://maartyman.github.io/incremunica/",
+  "homepage": "https://comunica.github.io/incremunica/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/inner-join"
   },
   "bugs": {
-    "url": "https://github.com/maartyman/incremunica/issues"
+    "url": "https://github.com/comunica/incremunica/issues"
   },
   "keywords": [
     "comunica",

@@ -1,17 +1,17 @@
 {
   "name": "@incremunica/actor-bindings-aggregator-factory-wildcard-count",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An Incremunica wildcard-count actor for bindings aggregator factory bus.",
   "lsd:module": true,
   "license": "MIT",
-  "homepage": "https://maartyman.github.io/incremunica/",
+  "homepage": "https://comunica.github.io/incremunica/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/actor-bindings-aggregator-factory-wildcard-count"
   },
   "bugs": {
-    "url": "https://github.com/maartyman/incremunica/issues"
+    "url": "https://github.com/comunica/incremunica/issues"
   },
   "keywords": [
     "comunica",
@@ -41,8 +41,8 @@
     "@comunica/types": "^4.1.0",
     "@comunica/utils-bindings-factory": "^4.1.0",
     "@comunica/utils-expression-evaluator": "^4.1.0",
-    "@incremunica/bus-bindings-aggregator-factory": "^2.2.0",
-    "@incremunica/context-entries": "^2.2.0",
+    "@incremunica/bus-bindings-aggregator-factory": "^2.2.1",
+    "@incremunica/context-entries": "^2.2.1",
     "@rdfjs/types": "*",
     "rdf-string": "^2.0.1"
   }

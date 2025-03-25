@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/maartyman/incremunica/actions/workflows/CI.yml?query=branch%3Amaster"><img src="https://github.com/maartyman/incremunica/actions/workflows/CI.yml/badge.svg?branch=master" alt="Build Status"></a>
-<a href="https://coveralls.io/github/maartyman/incremunica?branch=master"><img src="https://coveralls.io/repos/github/maartyman/incremunica/badge.svg?branch=master" alt="Coverage Status"></a>
-<a href="https://maartyman.github.io/incremunica/"><img src="https://img.shields.io/badge/doc-code_documentation-blueviolet"/></a>
+<a href="https://github.com/comunica/incremunica/actions/workflows/CI.yml?query=branch%3Amaster"><img src="https://github.com/comunica/incremunica/actions/workflows/CI.yml/badge.svg?branch=master" alt="Build Status"></a>
+<a href="https://coveralls.io/github/comunica/incremunica?branch=master"><img src="https://coveralls.io/repos/github/comunica/incremunica/badge.svg?branch=master" alt="Coverage Status"></a>
+<a href="https://comunica.github.io/incremunica/"><img src="https://img.shields.io/badge/doc-code_documentation-blueviolet"/></a>
 </p>
 
 This is a monorepo that builds upon the core Comunica packages to allow for incremental query evaluation.
@@ -21,7 +21,7 @@ The rest of this readme is intended for developers who want to contribute to Inc
 
 ## Contributing to Incremunica
 
-_(JSDoc: https://maartyman.github.io/incremunica/)_
+_(JSDoc: https://comunica.github.io/incremunica/)_
 
 This repository should be used by Comunica module **developers** as it contains multiple Incremunica modules that can be composed.
 This repository is managed as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md)
@@ -37,7 +37,7 @@ Incremunica is tested on OSX, Linux and Windows.
 This project can be setup by cloning and installing it as follows:
 
 ```bash
-$ git clone https://github.com/maartyman/incremunica.git
+$ git clone https://github.com/comunica/incremunica.git
 $ cd incremunica
 $ yarn install
 ```

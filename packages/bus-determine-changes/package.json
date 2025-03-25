@@ -1,17 +1,17 @@
 {
   "name": "@incremunica/bus-determine-changes",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A comunica bus for determine-changes events.",
   "lsd:module": true,
   "license": "MIT",
-  "homepage": "https://maartyman.github.io/incremunica/",
+  "homepage": "https://comunica.github.io/incremunica/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/bus-determine-changes"
   },
   "bugs": {
-    "url": "https://github.com/maartyman/incremunica/issues"
+    "url": "https://github.com/comunica/incremunica/issues"
   },
   "keywords": [
     "comunica",
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@comunica/core": "^4.1.0",
-    "@incremunica/streaming-query-source": "^2.2.0",
-    "@incremunica/types": "^2.2.0"
+    "@incremunica/streaming-query-source": "^2.2.1",
+    "@incremunica/types": "^2.2.1"
   }
 }
