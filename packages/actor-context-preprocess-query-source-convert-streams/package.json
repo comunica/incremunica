@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-context-preprocess-query-source-convert-streams",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A Context Preprocess actor that converts all streams in the query sources to AsyncIterators and puts them in an object.",
   "lsd:module": true,
   "license": "MIT",

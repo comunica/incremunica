@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-bindings-aggregator-factory-sum",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An Incremunica sum actor for bindings aggregator factory bus.",
   "lsd:module": true,
   "license": "MIT",
@@ -42,7 +42,7 @@
     "@comunica/core": "^4.1.0",
     "@comunica/types": "^4.1.0",
     "@comunica/utils-expression-evaluator": "^4.1.0",
-    "@incremunica/bus-bindings-aggregator-factory": "^2.2.0",
+    "@incremunica/bus-bindings-aggregator-factory": "^2.2.1",
     "@rdfjs/types": "*",
     "rdf-string": "^2.0.1"
   }

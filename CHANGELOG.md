@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.2.1"></a>
+## [v2.2.1](https://github.com/comunica/incremunica/compare/v2.2.0...v2.2.1) - 2025-03-25
+
+* [chore: update repository location](https://github.com/comunica/incremunica/commit/f6c0d1d8154008a86da9da400e1279cef0ac1d9c)
+* [chore(deps): update dependency typedoc to ^0.28.0](https://github.com/comunica/incremunica/commit/cab2b58008184b11ffa098b803e142563c4abe0f)
+
 <a name="v2.2.0"></a>
 ## [v2.2.0](https://github.com/comunica/incremunica/compare/v2.1.0...v2.2.0) - 2025-03-11
 

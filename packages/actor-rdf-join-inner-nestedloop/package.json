@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-rdf-join-inner-nestedloop",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A inner-nestedloop rdf-join actor",
   "lsd:module": true,
   "license": "MIT",
@@ -41,7 +41,7 @@
     "@comunica/core": "^4.1.0",
     "@comunica/mediatortype-join-coefficients": "^4.1.0",
     "@comunica/utils-bindings-factory": "^4.1.0",
-    "@incremunica/context-entries": "^2.2.0",
-    "@incremunica/inner-join": "^2.2.0"
+    "@incremunica/context-entries": "^2.2.1",
+    "@incremunica/inner-join": "^2.2.1"
   }
 }

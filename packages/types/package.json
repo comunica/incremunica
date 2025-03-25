@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/types",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Types module for Incremunica",
   "lsd:module": true,
   "license": "MIT",

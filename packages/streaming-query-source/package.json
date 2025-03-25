@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/streaming-query-source",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A base class for streaming query sources",
   "lsd:module": true,
   "license": "MIT",

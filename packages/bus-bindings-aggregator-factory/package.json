@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/bus-bindings-aggregator-factory",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An Incremunica bus for bindings aggregator factories.",
   "lsd:module": true,
   "license": "MIT",
@@ -42,7 +42,7 @@
     "@comunica/types": "^4.1.0",
     "@comunica/utils-bindings-factory": "^4.1.0",
     "@comunica/utils-expression-evaluator": "^4.1.0",
-    "@incremunica/context-entries": "^2.2.0",
+    "@incremunica/context-entries": "^2.2.1",
     "@rdfjs/types": "*",
     "sparqlalgebrajs": "^4.3.8"
   }
