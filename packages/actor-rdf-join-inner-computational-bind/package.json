@@ -51,6 +51,6 @@
     "@incremunica/context-entries": "^2.2.1",
     "@incremunica/streaming-query-source": "^2.2.1",
     "asynciterator": "^3.9.0",
-    "sparqlalgebrajs": "^4.3.8"
+    "sparqlalgebrajs": "^5.0.0"
   }
 }

@@ -44,6 +44,6 @@
     "@comunica/utils-bindings-factory": "^4.1.0",
     "@incremunica/context-entries": "^2.2.1",
     "rdf-string": "^2.0.1",
-    "sparqlalgebrajs": "^4.3.8"
+    "sparqlalgebrajs": "^5.0.0"
   }
 }
