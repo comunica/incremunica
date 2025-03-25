@@ -1,6 +1,6 @@
 {
   "private": true,
-  "repository": "https://github.com/maartyman/incremunica/",
+  "repository": "https://github.com/comunica/incremunica/",
   "workspaces": [
     "engines/*",
     "packages/*"

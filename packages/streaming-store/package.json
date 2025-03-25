@@ -7,7 +7,7 @@
   "homepage": "https://github.com/comunica",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maartyman/incremunica.git",
+    "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/incremental-rdf-streaming-store"
   },
   "bugs": {
