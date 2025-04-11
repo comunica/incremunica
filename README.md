@@ -20,7 +20,7 @@ To query with Incremunica, you can follow the guide in the [`@incremunica/query-
 The rest of this readme is intended for developers who want to contribute to Incremunica.
 
 ## Contributing to Incremunica
-**tl;dr:** Use `yarn install` instead of `npm install` and generally pull request should go to the `next/minor` branch.
+**tl;dr:** Use `yarn install` instead of ~~`npm install`~~ and generally pull request should go to the `next/minor` branch.
 
 _(JSDoc: https://comunica.github.io/incremunica/)_
 
@@ -43,7 +43,7 @@ $ cd incremunica
 $ yarn install
 ```
 
-**Note: `npm install` is not supported at the moment, as this project makes use of Yarn's [workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) functionality**
+**Note: ~~`npm install`~~ is not supported at the moment, as this project makes use of Yarn's [workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) functionality**
 
 This will install the dependencies of all modules, and bootstrap the Lerna monorepo.
 
