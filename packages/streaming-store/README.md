@@ -133,8 +133,3 @@ store.import(streamifyArray([
 // Since we mark the store as ended, the returnStream will print `Done!`
 store.end();
 ```
-
-## License
-This software is written by Maarten Vandenbrande and [Ruben Taelman](https://rubensworks.net/).
-
-This code is released under the [MIT license](http://opensource.org/licenses/MIT).
