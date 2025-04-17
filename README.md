@@ -1,6 +1,8 @@
-<h1 align="center">
-    Incremunica
-</h1>
+<p align="center">
+  <a href="https://www.npmjs.com/package/@incremunica/query-sparql-incremental">
+      <img width="400" src="https://github.com/user-attachments/assets/8b41f58a-dd43-4555-8b1f-29f0dfd5b736">
+  </a>
+</p>
 
 <p align="center">
   <strong>Incremental query evaluation for Comunica</strong>
