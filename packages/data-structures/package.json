@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/data-structures",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A collection of reusable datastructures.",
   "license": "MIT",
   "homepage": "https://comunica.github.io/incremunica/",
@@ -29,7 +29,5 @@
   ],
   "scripts": {
     "build": "node \"../../node_modules/typescript/bin/tsc\""
-  },
-  "dependencies": {
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-bindings-aggregator-factory-max",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "An Incremunica max actor for bindings aggregator factory bus.",
   "lsd:module": true,
   "license": "MIT",

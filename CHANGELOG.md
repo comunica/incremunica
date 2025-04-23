@@ -1,6 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.2.2"></a>
+## [v2.2.2](https://github.com/comunica/incremunica/compare/v2.2.1...v2.2.2) - 2025-04-23
+
+* [chore: extend TODO deadlines](https://github.com/comunica/incremunica/commit/4f2f7f9488348e4128e4fbbe073d8197db6e9011)
+* [fix: remove data-structure-typed dependency](https://github.com/comunica/incremunica/commit/cd537cba236ed163e06b19ee562bc79bbda26bc3)
+* [chore: correct package.json](https://github.com/comunica/incremunica/commit/bef709cb83f5fd1e3ebcbcc40c041607090c7ea8)
+* [chore: update README](https://github.com/comunica/incremunica/commit/08973112179413e6072a5171178577b4b113b752)
+* [chore: Update README.md](https://github.com/comunica/incremunica/commit/b9fd0019b9d6c232e778a7305bbd1885c2cdc777)
+* [chore: strike through npm install in readme](https://github.com/comunica/incremunica/commit/d72e730eba9d3f075eac8a8e4afbcac4a09deaf4)
+* [chore: update readme for contributions](https://github.com/comunica/incremunica/commit/9d5e00cb02d13e5021610c6a5db5a7ac233ab095)
+* [chore: fix licensing](https://github.com/comunica/incremunica/commit/d5d3acb13845708dc9ec5a4d2588aee9d640f156)
+* [Merge pull request #138 from TomWindels/patch-1](https://github.com/comunica/incremunica/commit/83cc58493b32984854186562ed04f926693300ca)
+* [Update README.md](https://github.com/comunica/incremunica/commit/01ce24acf1a8256db19e1828a3b951ee33feac3b)
+* [Merge pull request #137 from comunica/next/minor](https://github.com/comunica/incremunica/commit/a06cecb29d3b381b1c329e9646477c76aebbdc62)
+* [Merge pull request #129 from maartyman/next/minor](https://github.com/comunica/incremunica/commit/8a098421f6d6958a9c12b1fb15f3d82427775d0c)
+
 <a name="v2.2.1"></a>
 ## [v2.2.1](https://github.com/comunica/incremunica/compare/v2.2.0...v2.2.1) - 2025-03-25
 
