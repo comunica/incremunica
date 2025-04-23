@@ -4,14 +4,14 @@
   "description": "A collection of functions to help use Incremunica.",
   "lsd:module": true,
   "license": "MIT",
-  "homepage": "https://github.com/comunica",
+  "homepage": "https://comunica.github.io/incremunica/",
   "repository": {
     "type": "git",
     "url": "https://github.com/comunica/incremunica.git",
     "directory": "packages/user-tools"
   },
   "bugs": {
-    "url": "https://github.com/comunica/issues"
+    "url": "https://github.com/comunica/incremunica/issues"
   },
   "keywords": [
     "user",
@@ -37,9 +37,9 @@
   "dependencies": {
     "@comunica/types": "^4.1.0",
     "@incremunica/context-entries": "^2.2.1",
+    "@incremunica/data-structures": "^2.2.1",
     "@incremunica/types": "^2.2.1",
     "@rdfjs/types": "*",
-    "asynciterator": "^3.9.0",
-    "data-structure-typed": "^2.0.1"
+    "asynciterator": "^3.9.0"
   }
 }
