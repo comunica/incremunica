@@ -16,8 +16,8 @@ import type {
 import type { Bindings } from '@comunica/utils-bindings-factory';
 import { getSafeBindings } from '@comunica/utils-query-operation';
 import { KeysBindings } from '@incremunica/context-entries';
+import { DoublyLinkedList } from '@incremunica/data-structures';
 import type { AsyncIterator } from 'asynciterator';
-import { DoublyLinkedList } from 'data-structure-typed';
 import type { Algebra } from 'sparqlalgebrajs';
 
 /**

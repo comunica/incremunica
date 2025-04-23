@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/dev-tools",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Development tools for comunica/incremunica.",
   "lsd:module": true,
   "license": "MIT",

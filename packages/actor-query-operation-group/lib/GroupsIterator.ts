@@ -5,16 +5,16 @@ import type {
   MediatorBindingsAggregatorFactory,
 } from '@incremunica/bus-bindings-aggregator-factory';
 import { KeysBindings } from '@incremunica/context-entries';
+import { Queue } from '@incremunica/data-structures';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
-import { Queue } from 'data-structure-typed';
 import type { Algebra } from 'sparqlalgebrajs';
 
 type IGroupObject = {
   groupBindings: Bindings;
   aggregators: Record<string, IActorBindingsAggregatorFactoryOutput>;
   // When waiting on the aggregators we put incoming bindings in the groupBuffer
-  groupBuffer: Queue<Bindings, Bindings> | undefined;
+  groupBuffer: Queue<Bindings> | undefined;
   previousBindings: Bindings | undefined;
   count: number;
 };

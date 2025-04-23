@@ -189,7 +189,7 @@ export function createTestContextWithDataFactory(dataFactory?: DataFactory, cont
   return context.set(KeysInitQuery.dataFactory, dataFactory);
 }
 
-// TODO [2025-04-01]: The following functions are not accessible for incremunica, maybe fix this in comunica
+// TODO [2025-05-01]: The following functions are not accessible for incremunica, maybe fix this in comunica
 export function createTermCompMediator(): MediatorTermComparatorFactory {
   return <MediatorTermComparatorFactory> {
     async mediate(action) {

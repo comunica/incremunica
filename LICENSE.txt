@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright © 2022-now Ruben Taelman
+Copyright © 2022-now Maarten Vandenbrade
 Ghent University – imec, Belgium
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
