@@ -131,7 +131,7 @@ export class ActorQueryOperationFilter extends ActorQueryOperationTypedMediated<
 
             const it = (<AsyncIterator<Bindings>><any>intermediateOutput.bindingsStream).transform({
               transform,
-              // TODO [2025-04-01]: only prepend when the iterator becomes unreadable/is up to date
+              // TODO [2025-05-01]: only prepend when the iterator becomes unreadable/is up to date
               prepend: operation.expression.not ? [ bindings ] : undefined,
             });
 
