@@ -1,8 +1,8 @@
 import type { Bindings, BindingsStream } from '@comunica/types';
+import { Queue } from '@incremunica/data-structures';
 import type { IQuerySourceStreamElement, NonStreamingQuerySource, QuerySourceStream } from '@incremunica/types';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
-import { Queue } from 'data-structure-typed';
 import { isAddition } from './BindingsTools';
 
 /**

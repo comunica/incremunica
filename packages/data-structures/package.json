@@ -1,0 +1,35 @@
+{
+  "name": "@incremunica/data-structures",
+  "version": "2.2.1",
+  "description": "A collection of reusable datastructures.",
+  "license": "MIT",
+  "homepage": "https://comunica.github.io/incremunica/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/comunica/incremunica.git",
+    "directory": "packages/data-structures"
+  },
+  "bugs": {
+    "url": "https://github.com/comunica/incremunica/issues"
+  },
+  "keywords": [
+    "incremunica",
+    "data-structures"
+  ],
+  "sideEffects": false,
+  "main": "lib/index.js",
+  "typings": "lib/index",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "lib/**/*.js.map"
+  ],
+  "scripts": {
+    "build": "node \"../../node_modules/typescript/bin/tsc\""
+  },
+  "dependencies": {
+  }
+}

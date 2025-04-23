@@ -20,10 +20,10 @@ import type {
 } from '@comunica/types';
 import { MetadataValidationState } from '@comunica/utils-metadata';
 import { KeysStreamingSource } from '@incremunica/context-entries';
+import { Queue } from '@incremunica/data-structures';
 import type { IQuerySourceStreamElement, QuerySourceStream } from '@incremunica/types';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator, UnionIterator } from 'asynciterator';
-import { Queue } from 'data-structure-typed';
 import { type Algebra, Factory } from 'sparqlalgebrajs';
 import type { Operation } from 'sparqlalgebrajs/lib/algebra';
 
