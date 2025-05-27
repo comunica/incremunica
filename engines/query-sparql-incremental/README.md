@@ -23,7 +23,6 @@ Incremunica can be used in JavaScript/TypeScript applications and from the comma
 ### Usage within application
 
 This engine can be used in JavaScript/TypeScript applications as follows:
-To help develop with Incremunica we provide a collection of helper functions/classes in the [@incremunica/user-tools](https://www.npmjs.com/package/@incremunica/user-tools) package.
 
 ```javascript
 const QueryEngine = require('@incremunica/query-sparql-incremental').QueryEngine;
@@ -41,6 +40,7 @@ async function main() {
             "https://ruben.verborgh.org/profile/",
             "https://www.rubensworks.net/"
         ],
+        pollingPeriod: 1, // Poll every second
     });
 
     // Consume results as a stream
@@ -69,6 +69,13 @@ async function main() {
 
 main();
 ```
+
+To help develop with Incremunica we provide a collection of helper functions/classes in the [@incremunica/user-tools](https://www.npmjs.com/package/@incremunica/user-tools) package.
+The polling period is the time interval in seconds that the engine will check for changes in the data sources.
+The `data` event will be emitted whenever a new result is available, this result will be annotated as an addition or deletion.
+The `end` event will be emitted when the query is manually closed.
+Finally, the `error` event will be emitted when an error occurs during the query.
+This interface is similar to the one provided by the [Comunica query-sparql](https://www.npmjs.com/package/@comunica/query-sparql) package.
 
 You can also use an [incremental triple store](https://www.npmjs.com/package/@incremunica/streaming-store).
 This store allows you to change the dataset (additions and deletions) and show you the changes in the query results.
