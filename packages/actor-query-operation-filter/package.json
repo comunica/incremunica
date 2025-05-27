@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-query-operation-filter",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "An incremental filter query-operation actor",
   "lsd:module": true,
   "license": "MIT",

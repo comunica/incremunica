@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/bus-determine-changes",
-  "version": "2.2.1",
+  "version": "2.2.3",
   "description": "A comunica bus for determine-changes events.",
   "lsd:module": true,
   "license": "MIT",
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@comunica/core": "^4.1.0",
-    "@incremunica/streaming-query-source": "^2.2.1",
+    "@incremunica/streaming-query-source": "^2.2.3",
     "@incremunica/types": "^2.2.1"
   }
 }
