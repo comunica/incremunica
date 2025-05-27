@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.2.3"></a>
+## [v2.2.3](https://github.com/comunica/incremunica/compare/v2.2.2...v2.2.3) - 2025-05-27
+
+* [chore: delay TODO deadlines](https://github.com/comunica/incremunica/commit/20b208bcd0c5b5fcc6090ba10fe5b4e17f32638e)
+* [chore: improve documentation](https://github.com/comunica/incremunica/commit/2f415e072debcb52f87e57aec7b3f96565977421)
+* [fix: components not uploaded to npm](https://github.com/comunica/incremunica/commit/0c27973d30f45d22c34e6cb40fbb9c397ee4810a)
+
 <a name="v2.2.2"></a>
 ## [v2.2.2](https://github.com/comunica/incremunica/compare/v2.2.1...v2.2.2) - 2025-04-23
 

@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-determine-changes-naive",
-  "version": "2.2.1",
+  "version": "2.2.3",
   "description": "A naive determine-changes actor",
   "lsd:module": true,
   "license": "MIT",
@@ -39,9 +39,9 @@
   "dependencies": {
     "@comunica/bus-dereference-rdf": "^4.1.0",
     "@comunica/core": "^4.1.0",
-    "@incremunica/actor-query-source-identify-streaming-rdfjs": "^2.2.1",
-    "@incremunica/bus-determine-changes": "^2.2.1",
+    "@incremunica/actor-query-source-identify-streaming-rdfjs": "^2.2.3",
+    "@incremunica/bus-determine-changes": "^2.2.3",
     "@incremunica/bus-source-watch": "^2.2.1",
-    "@incremunica/streaming-query-source": "^2.2.1"
+    "@incremunica/streaming-query-source": "^2.2.3"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-query-source-identify-streaming-rdfjs",
-  "version": "2.2.1",
+  "version": "2.2.3",
   "description": "A Streaming rdfjs query-source-identify actor",
   "lsd:module": true,
   "license": "MIT",
@@ -45,7 +45,7 @@
     "@comunica/utils-bindings-factory": "^4.1.0",
     "@comunica/utils-metadata": "^4.1.0",
     "@incremunica/context-entries": "^2.2.1",
-    "@incremunica/streaming-query-source": "^2.2.1",
+    "@incremunica/streaming-query-source": "^2.2.3",
     "@incremunica/streaming-store": "^2.2.1",
     "@incremunica/types": "^2.2.1",
     "@rdfjs/types": "*",
