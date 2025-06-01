@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-query-operation-distinct-hash",
-  "version": "2.2.1",
+  "version": "2.2.4",
   "description": "A distinct-hash query-operation actor",
   "lsd:module": true,
   "license": "MIT",
@@ -44,7 +44,7 @@
     "@comunica/types": "^4.1.0",
     "@comunica/utils-bindings-factory": "^4.1.0",
     "@comunica/utils-query-operation": "^4.1.0",
-    "@incremunica/context-entries": "^2.2.1",
+    "@incremunica/context-entries": "^2.2.4",
     "@rdfjs/types": "*",
     "sparqlalgebrajs": "^4.3.8"
   }

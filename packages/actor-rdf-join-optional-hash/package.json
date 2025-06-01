@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-rdf-join-optional-hash",
-  "version": "2.2.1",
+  "version": "2.2.4",
   "description": "An optional-hash rdf-join actor",
   "lsd:module": true,
   "license": "MIT",
@@ -42,7 +42,7 @@
     "@comunica/core": "^4.1.0",
     "@comunica/mediatortype-join-coefficients": "^4.1.0",
     "@comunica/utils-bindings-factory": "^4.1.0",
-    "@incremunica/context-entries": "^2.2.1",
+    "@incremunica/context-entries": "^2.2.4",
     "@incremunica/inner-join": "^2.2.1",
     "asynciterator": "^3.9.0"
   }

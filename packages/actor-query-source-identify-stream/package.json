@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-query-source-identify-stream",
-  "version": "2.2.2",
+  "version": "2.2.4",
   "description": "A Streaming query-source-identify actor",
   "lsd:module": true,
   "license": "MIT",
@@ -45,7 +45,7 @@
     "@comunica/core": "^4.1.0",
     "@comunica/types": "^4.1.0",
     "@comunica/utils-metadata": "^4.1.0",
-    "@incremunica/context-entries": "^2.2.1",
+    "@incremunica/context-entries": "^2.2.4",
     "@incremunica/data-structures": "^2.2.2",
     "@incremunica/types": "^2.2.1",
     "@rdfjs/types": "*",
