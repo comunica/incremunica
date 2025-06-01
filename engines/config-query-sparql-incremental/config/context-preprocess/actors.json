@@ -46,8 +46,8 @@
         "invalidateCache": "@comunica/actor-init-query:invalidateCache",
         "dataFactory": "@comunica/actor-init-query:dataFactory",
         "distinctConstruct": "@comunica/actor-init-query:distinctConstruct",
-        "pollingPeriod": "@incremunica/resource-watch:pollingPeriod",
-        "deferredEvaluationTrigger": "@incremunica/resource-watch:deferredEvaluationTrigger"
+        "pollingPeriod": "@incremunica/source-watch:pollingPeriod",
+        "deferredEvaluationTrigger": "@incremunica/source-watch:deferredEvaluationTrigger"
       }
     },
     {
