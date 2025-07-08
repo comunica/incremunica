@@ -26,14 +26,35 @@ const bindings1 = BF.fromRecord({
 });
 const bindings2 = BF.fromRecord({
   s: DF.namedNode('http://ex.org/s'),
-}).getContextEntry(KeysBindings.isAddition, true);
+}).setContextEntry(KeysBindings.isAddition, true);
 const bindings3 = BF.fromRecord({
   s: DF.namedNode('http://ex.org/s'),
-}).getContextEntry(KeysBindings.isAddition, false);
+}).setContextEntry(KeysBindings.isAddition, false);
 
 console.log(isAddition(bindings1)); // true
 console.log(isAddition(bindings2)); // true
 console.log(isAddition(bindings3)); // false
+```
+
+The `getBindingsIndex` function can be used in case the query uses an ORDER BY clause.
+The function returns the index of the bindings in the result set and `-1` if there is no index.
+
+```typescript
+import { getBindingsIndex } from '@incremunica/user-tools';
+import { KeysBindings } from '@incremunica/context-entries';
+import { BindingsFactory } from '@comunica/utils-bindings-factory';
+
+export const BF = new BindingsFactory();
+
+const bindings1 = BF.fromRecord({
+  s: DF.namedNode('http://ex.org/s'),
+});
+const bindings2 = BF.fromRecord({
+  s: DF.namedNode('http://ex.org/s'),
+}).setContextEntry(KeysBindings.order, {index: 0});
+
+console.log(getBindingsIndex(bindings1)); // -1
+console.log(getBindingsIndex(bindings2)); // 0
 ```
 
 ### DeferredEvaluationTools

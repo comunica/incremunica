@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.2.4"></a>
+## [v2.2.4](https://github.com/comunica/incremunica/compare/v2.2.3...v2.2.4) - 2025-06-01
+
+* [fix: name spaces and keys for source watch](https://github.com/comunica/incremunica/commit/033202cb7864e86273f7b7d38618c7630909166d)
+* [chore: update readme](https://github.com/comunica/incremunica/commit/ecd91c75613dbbf01043a33bf7b3cae02fdded08)
+
 <a name="v2.2.3"></a>
 ## [v2.2.3](https://github.com/comunica/incremunica/compare/v2.2.2...v2.2.3) - 2025-05-27
 
