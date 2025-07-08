@@ -37,8 +37,8 @@
     "build:ts": "node \"../../node_modules/typescript/bin/tsc\""
   },
   "dependencies": {
-    "@comunica/types": "^4.1.0",
-    "@comunica/utils-bindings-factory": "^4.1.0",
+    "@comunica/types": "^4.2.0",
+    "@comunica/utils-bindings-factory": "^4.2.0",
     "@incremunica/context-entries": "^2.2.4",
     "@rdfjs/types": "*",
     "arrayify-stream": "^3.0.0"
