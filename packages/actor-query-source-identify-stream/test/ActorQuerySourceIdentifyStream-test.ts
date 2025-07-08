@@ -1042,6 +1042,7 @@ describe('ActorQuerySourceIdentifyStream', () => {
                       { variable: DF.variable('v'), canBeUndef: false },
                     ],
                   });
+                  (<any>it).started = true;
 
                   // We need to mock LinkedRdfSourcesAsyncRdfIterator, _destroy is overwritten due to it not destroying
                   Object.setPrototypeOf(it, LinkedRdfSourcesAsyncRdfIterator.prototype);
@@ -1159,6 +1160,7 @@ describe('ActorQuerySourceIdentifyStream', () => {
                       { variable: DF.variable('v'), canBeUndef: false },
                     ],
                   });
+                  (<any>it).started = true;
 
                   const matchOptions = currentContext.get(KeysStreamingSource.matchOptions);
                   matchOptions.push({
