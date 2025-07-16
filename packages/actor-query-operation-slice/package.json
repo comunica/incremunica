@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-query-operation-slice",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "A slice query-operation actor",
   "lsd:module": true,
   "license": "MIT",
@@ -42,7 +42,7 @@
     "@comunica/core": "^4.2.0",
     "@comunica/types": "^4.2.0",
     "@comunica/utils-bindings-factory": "^4.2.0",
-    "@incremunica/context-entries": "^2.2.4",
+    "@incremunica/context-entries": "^2.3.0",
     "rdf-string": "^2.0.1",
     "sparqlalgebrajs": "^4.3.8"
   }

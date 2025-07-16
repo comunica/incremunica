@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.0"></a>
+## [v2.3.0](https://github.com/comunica/incremunica/compare/v2.2.4...v2.3.0) - 2025-07-16
+
+* [chore: update to comunica v4.3.0](https://github.com/comunica/incremunica/commit/4932e325fd3ea4dd2ba2d13211495718c1270366)
+* [chore: extend todo deadlines](https://github.com/comunica/incremunica/commit/59904d0c761835170c5bfa776acc6eae2f5df59c)
+* [Merge branch 'master' into next/minor](https://github.com/comunica/incremunica/commit/de5cf64c357c95854892e42ff716889534ae905b)
+* [Merge pull request #140 from comunica/next/minor](https://github.com/comunica/incremunica/commit/ce23871f0daff51db4351cbaba114ec4641981a0)
+* [Merge pull request #139 from comunica/next/minor](https://github.com/comunica/incremunica/commit/82a03d0439423c59489314b3b2acb0748414c81b)
+
 <a name="v2.2.4"></a>
 ## [v2.2.4](https://github.com/comunica/incremunica/compare/v2.2.3...v2.2.4) - 2025-06-01
 

@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-merge-bindings-context-is-addition",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "An incremunica Merge Bindings Context actor that merges the isAddition attribute.",
   "lsd:module": true,
   "license": "MIT",

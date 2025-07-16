@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/streaming-store",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "An RDF Store where the match function gives a stream.",
   "lsd:module": true,
   "license": "MIT",
@@ -47,6 +47,6 @@
     "readable-stream": "^4.3.0"
   },
   "devDependencies": {
-    "@incremunica/types": "^2.2.1"
+    "@incremunica/types": "^2.3.0"
   }
 }

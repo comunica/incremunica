@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-rdf-metadata-extract-determine-changes-data",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "A determine-changes-data rdf-metadata-extract actor",
   "lsd:module": true,
   "license": "MIT",

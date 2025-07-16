@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-bindings-aggregator-factory-group-concat",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "An Incremunica group concat actor for bindings aggregator factory bus.",
   "lsd:module": true,
   "license": "MIT",
@@ -41,7 +41,7 @@
     "@comunica/core": "^4.2.0",
     "@comunica/types": "^4.2.0",
     "@comunica/utils-expression-evaluator": "^4.2.0",
-    "@incremunica/bus-bindings-aggregator-factory": "^2.2.4",
+    "@incremunica/bus-bindings-aggregator-factory": "^2.3.0",
     "@rdfjs/types": "*",
     "rdf-string": "^2.0.1"
   }

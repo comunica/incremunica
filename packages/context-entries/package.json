@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/context-entries",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "A collection of reusable Incremunica context key definitions.",
   "license": "MIT",
   "homepage": "https://comunica.github.io/incremunica/",
@@ -34,6 +34,6 @@
   },
   "dependencies": {
     "@comunica/core": "^4.2.0",
-    "@incremunica/types": "^2.2.1"
+    "@incremunica/types": "^2.3.0"
   }
 }

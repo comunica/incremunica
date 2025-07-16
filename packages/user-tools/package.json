@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/user-tools",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "A collection of functions to help use Incremunica.",
   "lsd:module": true,
   "license": "MIT",
@@ -36,9 +36,9 @@
   },
   "dependencies": {
     "@comunica/types": "^4.2.0",
-    "@incremunica/context-entries": "^2.2.4",
+    "@incremunica/context-entries": "^2.3.0",
     "@incremunica/data-structures": "^2.2.2",
-    "@incremunica/types": "^2.2.1",
+    "@incremunica/types": "^2.3.0",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0"
   }
