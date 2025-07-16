@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-bindings-aggregator-factory-count",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "An Incremunica count actor for bindings aggregator factory bus.",
   "lsd:module": true,
   "license": "MIT",
@@ -37,10 +37,10 @@
     "build:components": "componentsjs-generator"
   },
   "dependencies": {
-    "@comunica/core": "^4.1.0",
-    "@comunica/types": "^4.1.0",
-    "@comunica/utils-expression-evaluator": "^4.1.0",
-    "@incremunica/bus-bindings-aggregator-factory": "^2.2.4",
+    "@comunica/core": "^4.2.0",
+    "@comunica/types": "^4.2.0",
+    "@comunica/utils-expression-evaluator": "^4.2.0",
+    "@incremunica/bus-bindings-aggregator-factory": "^2.3.0",
     "@rdfjs/types": "*",
     "rdf-string": "^2.0.1",
     "sparqlalgebrajs": "^4.3.8"

@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/context-entries",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "A collection of reusable Incremunica context key definitions.",
   "license": "MIT",
   "homepage": "https://comunica.github.io/incremunica/",
@@ -33,7 +33,7 @@
     "build": "node \"../../node_modules/typescript/bin/tsc\""
   },
   "dependencies": {
-    "@comunica/core": "^4.1.0",
-    "@incremunica/types": "^2.2.1"
+    "@comunica/core": "^4.2.0",
+    "@incremunica/types": "^2.3.0"
   }
 }

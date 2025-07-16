@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/bus-source-watch",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "An incremunica bus for source-watch events.",
   "lsd:module": true,
   "license": "MIT",
@@ -36,7 +36,7 @@
     "build:components": "componentsjs-generator"
   },
   "dependencies": {
-    "@comunica/core": "^4.1.0",
-    "@incremunica/types": "^2.2.1"
+    "@comunica/core": "^4.2.0",
+    "@incremunica/types": "^2.3.0"
   }
 }

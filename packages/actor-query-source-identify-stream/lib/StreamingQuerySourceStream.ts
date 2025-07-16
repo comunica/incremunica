@@ -184,7 +184,7 @@ export class StreamingQuerySourceStream implements IQuerySource {
     }
 
     const variables = getVariables(<Algebra.Pattern>operation);
-    // TODO [2025-06-01]: We need to first read the sources and then start the iterator with a more accurate metadata
+    // TODO [2025-09-01]: We need to first read the sources and then start the iterator with a more accurate metadata
     // Furthermore the cardinality value should not start at 1 but it does not work otherwise
     let accumulatedMetadata: MetadataBindings = {
       state: new MetadataValidationState(),

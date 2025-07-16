@@ -69,7 +69,7 @@ export class ActorSourceWatchSolidNotificationWebsockets extends ActorSourceWatc
       }
       socket = new WebSocket(sideData.notificationChannel);
       socket.onmessage = (message) => {
-        // TODO [2025-06-01]: For now ignoring the Buffer options => tests?
+        // TODO [2025-09-01]: For now ignoring the Buffer options => tests?
         // let data: string | Buffer | ArrayBuffer | Buffer[] = message.data;
         // if (Array.isArray(data)) {
         // data = Buffer.concat(data);

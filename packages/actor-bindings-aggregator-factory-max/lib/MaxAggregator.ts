@@ -7,7 +7,7 @@ import AVLTree from 'avl';
 import type { Term } from 'n3';
 import { termToString } from 'rdf-string';
 
-// TODO [2025-06-01]: Make a tree implementation that has constant time complexity for max and min
+// TODO [2025-09-01]: Make a tree implementation that has constant time complexity for max and min
 //  and has a remove function for a node (not only a key)
 //  or maybe don't use a tree
 export class MaxAggregator extends AggregateEvaluator implements IBindingsAggregator {

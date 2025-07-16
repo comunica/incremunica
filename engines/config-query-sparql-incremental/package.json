@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/config-query-sparql-incremental",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "default configuration files for Comunica SPARQL Incremental",
   "lsd:module": true,
   "license": "MIT",
@@ -40,6 +40,6 @@
     "build:components": "componentsjs-generator"
   },
   "dependencies": {
-    "@comunica/config-query-sparql": "^4.1.0"
+    "@comunica/config-query-sparql": "^4.3.0"
   }
 }

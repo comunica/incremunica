@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/inner-join",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "An inner-join base class",
   "lsd:module": true,
   "license": "MIT",
@@ -36,7 +36,7 @@
     "build:components": "componentsjs-generator"
   },
   "dependencies": {
-    "@comunica/utils-bindings-factory": "^4.1.0",
+    "@comunica/utils-bindings-factory": "^4.2.0",
     "asynciterator": "^3.9.0"
   }
 }
