@@ -2,6 +2,7 @@ import type { ComunicaDataFactory } from '@comunica/types';
 import type * as RDF from '@rdfjs/types';
 import type { GraphQLArgument, GraphQLField, GraphQLObjectType } from 'graphql';
 import { getNamedType, GraphQLID, buildSchema, isScalarType, GraphQLNonNull } from 'graphql';
+import { json } from 'node:stream/consumers';
 import type { Algebra } from 'sparqlalgebrajs';
 
 export class SparqlQueryConverter {
@@ -34,7 +35,7 @@ export class SparqlQueryConverter {
     if (trees.roots.length > 1) {
       throw new Error(`Multiple entrypoints found: ${trees.roots.length}`);
     }
-    if (trees.roots.length < 0) {
+    if (trees.roots.length <= 0) {
       throw new Error(`No entrypoints found`);
     }
 
@@ -43,10 +44,6 @@ export class SparqlQueryConverter {
   }
 
   private toSchemaNs(term: RDF.Term): RDF.Term {
-    if (term.termType !== 'NamedNode') {
-      return term;
-    }
-
     for (const [ prefix, ns ] of Object.entries(this.context)) {
       if (term.value.startsWith(ns)) {
         const local = term.value.slice(ns.length);
@@ -54,7 +51,7 @@ export class SparqlQueryConverter {
       }
     }
 
-    throw new Error(`Term cannot be converted to schema namespace: ${term.value}`);
+    throw new Error(`Missing predicate prefix in context: ${term.value}`);
   }
 
   private patternsToTrees(patterns: Algebra.Pattern[]): Trees {
@@ -100,15 +97,26 @@ class Field {
   private readonly field: GraphQLField<any, any, any>;
   private readonly fieldType: GraphQLObjectType;
   private readonly idArg: GraphQLArgument | undefined;
+  private readonly idField: GraphQLField<any, any, any> | undefined;
 
   public constructor(field: GraphQLField<any, any, any>) {
     this.field = field;
     this.fieldType = <GraphQLObjectType>getNamedType(field.type);
     this.idArg = field.args.find(arg => getNamedType(arg.type) === GraphQLID);
+    if (this.idArg === undefined && !isScalarType(this.fieldType)) {
+      this.idField = Object.values(this.fieldType.getFields()).find(field => 
+        getNamedType(field.type) === GraphQLID
+      );
+    }
   }
 
-  public name(): string {
-    return this.field.name;
+  public id(): string | undefined {
+    if (this.idArg !== undefined) {
+      return this.idArg.name;
+    }
+    if (this.idField !== undefined) {
+      return this.idField.name;
+    }
   }
 
   public scalarLeaf(): boolean {
@@ -121,26 +129,26 @@ class Field {
 
   public toQuery(node: TreeNode): [string, Record<string, string>, Record<string, RawRDF>] {
     const varMap: Record<string, string> = {};
-    const filterMap: Record<string, RawRDF> = {};
+    let filterMap: Record<string, RawRDF> = {};
     let query = this.field.name;
 
     if (Object.keys(node.children).length > 0) {
       // Not a leaf node
       if (node.term.termType === 'NamedNode') {
-        query += `(${this.idArg?.name}: "${node.term.value}")`;
+        query += `(${this.id()}: "${node.term.value}")`;
       }
 
       query += ' { ';
 
       if (node.term.termType === 'Variable') {
-        query += 'id ';
-        varMap[node.term.value] = `${this.field.name}_id`;
+        query += `${this.id()} `;
+        varMap[node.term.value] = `${this.field.name}_${this.id()}`;
       }
 
       // Recursively add children
       for (const [ pred, child ] of Object.entries(node.children)) {
         const field = this.subField(pred);
-        const [ childQuery, childVarMap ] = field.toQuery(child);
+        const [ childQuery, childVarMap, childFilterMap ] = field.toQuery(child);
 
         query += `${childQuery} `;
 
@@ -148,6 +156,8 @@ class Field {
         for (const [ variable, mappedId ] of Object.entries(childVarMap)) {
           varMap[variable] = `${this.field.name}_${mappedId}`;
         }
+        // Update filters
+        filterMap = { ...filterMap, ...childFilterMap };
       }
 
       query += '} ';
@@ -191,11 +201,9 @@ class Field {
   public withId(subj: RDF.Term): boolean {
     if (subj.termType === 'Variable') {
       return !this.idArg || !(this.idArg.type instanceof GraphQLNonNull);
+    } else {
+      return this.idArg !== undefined || this.idField !== undefined;
     }
-    if (subj.termType === 'NamedNode') {
-      return this.idArg !== undefined;
-    }
-    throw new Error(`Unsupported term type for subject: ${subj.termType}`);
   }
 
   public withPredNode(pred: string, node: TreeNode): boolean {
@@ -207,6 +215,11 @@ class Field {
     // Literals are only found on leafs
     if (node.term.termType === 'Literal') {
       return field.scalarLeaf();
+    }
+
+    // RDFNode accepts all term types
+    if (field.fieldType.name === 'RDFNode') {
+      return true;
     }
 
     // Check if this field accepts the node term
@@ -251,10 +264,6 @@ function valueFromLiteral(term: RDF.Literal): string {
 
 function filterFields(fields: Field[], node: TreeNode): Field[] {
   let filtered = [ ...fields ];
-
-  if (Object.keys(node.children).length === 0) {
-    throw new Error('Not a valid root node: No Children.');
-  }
 
   filtered = filtered.filter(field => field.withId(node.term));
 
