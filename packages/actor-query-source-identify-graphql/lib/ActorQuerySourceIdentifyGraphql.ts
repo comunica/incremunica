@@ -27,21 +27,25 @@ export class ActorQuerySourceIdentifyGraphql extends ActorQuerySourceIdentify {
 
   public async test(action: IActionQuerySourceIdentify): Promise<TestResult<IActorTest>> {
     const source = action.querySourceUnidentified;
+    
     if (source.type === undefined || source.type !== 'graphql') {
       return failTest(`${this.name} requires a single query source with graphql type to be present in the context.`);
     }
+    const schema_source = action.querySourceUnidentified.context?.get(KeysGraphQLSource.schema);
+    if (schema_source === undefined) {
+      return failTest(`${this.name} requires a graphql schema to be present in the context.`)
+    }
+    const schema_context = action.querySourceUnidentified.context?.get(KeysGraphQLSource.context);
+    if (schema_context === undefined) {
+      return failTest(`${this.name} requires a graphql schema context to be present in the context.`);
+    }
+
     return passTestVoid();
   }
 
   public async run(action: IActionQuerySourceIdentify): Promise<IActorQuerySourceIdentifyOutput> {
     const schema_source = action.querySourceUnidentified.context?.get(KeysGraphQLSource.schema);
-    if (!schema_source) {
-      throw new Error(`${this.name} requires a graphql schema to be present in the context.`);
-    }
     const schema_context = action.querySourceUnidentified.context?.get(KeysGraphQLSource.context);
-    if (!schema_context) {
-      throw new Error(`${this.name} requires a graphql schema context to be present in the context.`);
-    }
     const dataFactory: ComunicaDataFactory = action.context.getSafe(KeysInitQuery.dataFactory);
     return {
       querySource: {
@@ -50,10 +54,10 @@ export class ActorQuerySourceIdentifyGraphql extends ActorQuerySourceIdentify {
           dataFactory,
           await BindingsFactory.create(this.mediatorMergeBindingsContext, action.context, dataFactory),
           this.mediatorHttp,
-          schema_source,
-          schema_context,
+          schema_source!,
+          schema_context!,
         ),
-        context: action.querySourceUnidentified.context ?? new ActionContext(),
+        context: action.querySourceUnidentified.context,
       },
     };
   }
