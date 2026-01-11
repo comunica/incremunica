@@ -8,7 +8,7 @@ import type {
 import { ActorQuerySourceIdentify } from '@comunica/bus-query-source-identify';
 import { KeysInitQuery } from '@comunica/context-entries';
 import type { TestResult, IActorTest } from '@comunica/core';
-import { failTest, passTestVoid, ActionContext } from '@comunica/core';
+import { failTest, passTestVoid } from '@comunica/core';
 import type { ComunicaDataFactory } from '@comunica/types';
 import { BindingsFactory } from '@comunica/utils-bindings-factory';
 import { QuerySourceGraphql } from './QuerySourceGraphql';
@@ -27,13 +27,13 @@ export class ActorQuerySourceIdentifyGraphql extends ActorQuerySourceIdentify {
 
   public async test(action: IActionQuerySourceIdentify): Promise<TestResult<IActorTest>> {
     const source = action.querySourceUnidentified;
-    
+
     if (source.type === undefined || source.type !== 'graphql') {
       return failTest(`${this.name} requires a single query source with graphql type to be present in the context.`);
     }
     const schema_source = action.querySourceUnidentified.context?.get(KeysGraphQLSource.schema);
     if (schema_source === undefined) {
-      return failTest(`${this.name} requires a graphql schema to be present in the context.`)
+      return failTest(`${this.name} requires a graphql schema to be present in the context.`);
     }
     const schema_context = action.querySourceUnidentified.context?.get(KeysGraphQLSource.context);
     if (schema_context === undefined) {

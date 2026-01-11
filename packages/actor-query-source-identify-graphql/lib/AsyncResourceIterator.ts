@@ -49,7 +49,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     this.readable = false;
     this.decoder = new TextDecoder('utf-8');
     this.subscribe().catch((err) => {
-      throw err;
+      this.handleError(err);
     });
   }
 
@@ -70,11 +70,6 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     // --- Filter resources based on filterMap ---
     for (const filterId of Object.keys(this.filterMap)) {
       const filterValue: RawRDF = this.filterMap[filterId];
-
-      if (!resource[filterId]) {
-        // Resource does not have filterId so does not have to be filtered
-        continue;
-      }
       const resourceValue = <RawRDF> resource[filterId];
 
       if (filterValue['@id']) {
@@ -155,12 +150,13 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
         const { value, done } = await reader.read();
 
         if (done) {
-          throw new Error('SSE subscription stream closed unexpectedly.');
+          this.close();
+          return;
         }
 
         dataBuffer += this.decoder.decode(Buffer.from(value));
         const parts = dataBuffer.split('\n\n');
-        dataBuffer = parts.pop() ?? '';
+        dataBuffer = '';
 
         for (const part of parts) {
           const lines = part.split('\n');
@@ -193,8 +189,13 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       }
     };
     handleSSE().catch((err) => {
-      throw err;
+      this.handleError(err);
     });
+  }
+
+  private handleError(error: Error): void {
+    this.emit('error', error);
+    this.close();
   }
 }
 
@@ -234,33 +235,17 @@ function flattenData(obj: any, prefix = ''): Resource {
   return result;
 }
 
-function isUri(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
 function termFromValue(value: any, dataFactory: ComunicaDataFactory): RDF.Term {
   const XSD = 'http://www.w3.org/2001/XMLSchema#';
 
-  if (typeof value === 'string') {
-    if (isUri(value)) {
-      return dataFactory.namedNode(value);
-    }
-    return dataFactory.literal(value, `${XSD}string`);
-  }
-
   if (typeof value === 'number') {
-    // Distinguish integers from decimals
     if (Number.isInteger(value)) {
       return dataFactory.literal(
         value.toString(),
         dataFactory.namedNode(`${XSD}integer`),
       );
     }
+
     return dataFactory.literal(
       value.toString(),
       dataFactory.namedNode(`${XSD}decimal`),
@@ -274,16 +259,21 @@ function termFromValue(value: any, dataFactory: ComunicaDataFactory): RDF.Term {
     );
   }
 
-  if (value instanceof Date) {
-    return dataFactory.literal(
-      value.toISOString(),
-      dataFactory.namedNode(`${XSD}dateTime`),
-    );
+  // Xsd:dateTime (e.g. 2024-01-01T12:30:00Z)
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?$/u.test(value)) {
+    return dataFactory.literal(value, dataFactory.namedNode(`${XSD}dateTime`));
   }
 
-  // Default: treat as string
-  return dataFactory.literal(
-    value.toString(),
-    dataFactory.namedNode(`${XSD}string`),
-  );
+  // Xsd:date (e.g. 2024-01-01)
+  if (/^\d{4}-\d{2}-\d{2}$/u.test(value)) {
+    return dataFactory.literal(value, dataFactory.namedNode(`${XSD}date`));
+  }
+
+  // Xsd:time (e.g. 12:30:00)
+  if (/^\d{2}:\d{2}:\d{2}(?:\.\d+)?$/u.test(value)) {
+    return dataFactory.literal(value, dataFactory.namedNode(`${XSD}time`));
+  }
+
+  // Default string
+  return dataFactory.literal(value, dataFactory.namedNode(`${XSD}string`));
 }

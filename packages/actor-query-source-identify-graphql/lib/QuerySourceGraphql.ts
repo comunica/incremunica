@@ -128,23 +128,23 @@ export class QuerySourceGraphql implements IQuerySource {
     }
 
     const patterns = extractPatterns(operation);
+    const converted = this.queryConverter.convertOperation(patterns);
 
-    for (const [ query, varMap, filterMap ] of this.queryConverter.convertOperation(patterns)) {
-      try {
-        return new AsyncResourceIterator(
-          this.source,
-          query,
-          context,
-          this.mediatorHttp,
-          variables,
-          varMap,
-          filterMap,
-          this.dataFactory,
-          this.bindingsFactory,
-        );
-      } catch {
-        continue;
-      }
+    // TODO [2026-09-01]: if more then one conversion possible, give them all to the iterator
+    // so it can try another when one fails.
+    if (converted.length > 0) {
+      const [ query, varMap, filterMap ] = converted[0];
+      return new AsyncResourceIterator(
+        this.source,
+        query,
+        context,
+        this.mediatorHttp,
+        variables,
+        varMap,
+        filterMap,
+        this.dataFactory,
+        this.bindingsFactory,
+      );
     }
 
     throw new Error(`Unable to convert SPARQL Query to Graphql Query for source ${this.source}`);

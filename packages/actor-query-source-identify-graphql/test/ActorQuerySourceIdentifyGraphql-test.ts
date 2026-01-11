@@ -1,12 +1,10 @@
-import { ActionContext, Bus } from "@comunica/core";
-import { ActorQuerySourceIdentifyGraphql } from "../lib";
-import { ActorQuerySourceIdentify } from "@comunica/bus-query-source-identify";
-import { MediatorMergeBindingsContext } from "@comunica/bus-merge-bindings-context";
-import { MediatorHttp } from "@comunica/bus-http";
-import { DataFactory } from "rdf-data-factory";
-import { KeysGraphQLSource } from "../lib/SchemaKeys";
-import { KeysInitQuery } from "@comunica/context-entries";
-import { QuerySourceGraphql } from "../lib/QuerySourceGraphql";
+import { ActorQuerySourceIdentify } from '@comunica/bus-query-source-identify';
+import { KeysInitQuery } from '@comunica/context-entries';
+import { ActionContext, Bus } from '@comunica/core';
+import { DataFactory } from 'rdf-data-factory';
+import { ActorQuerySourceIdentifyGraphql } from '../lib';
+import { QuerySourceGraphql } from '../lib/QuerySourceGraphql';
+import { KeysGraphQLSource } from '../lib/SchemaKeys';
 
 const mediatorMergeBindingsContext: any = {
   mediate: () => ({}),
@@ -48,10 +46,10 @@ describe('ActorQuerySourceIdentifyGraphql', () => {
 
     beforeEach(() => {
       actor = new ActorQuerySourceIdentifyGraphql({
-        name: "actor",
+        name: 'actor',
         bus,
         mediatorMergeBindingsContext,
-        mediatorHttp
+        mediatorHttp,
       });
     });
 
@@ -62,11 +60,11 @@ describe('ActorQuerySourceIdentifyGraphql', () => {
             type: 'graphql',
             value: 'http://example.com/graphql',
             context: new ActionContext({
-              [KeysGraphQLSource["schema"].name]: "",
-              [KeysGraphQLSource["context"].name]: {}
-            })
+              [KeysGraphQLSource.schema.name]: '',
+              [KeysGraphQLSource.context.name]: {},
+            }),
           },
-          context: new ActionContext()
+          context: new ActionContext(),
         })).resolves.toPassTest(true);
       });
 
@@ -76,10 +74,10 @@ describe('ActorQuerySourceIdentifyGraphql', () => {
             type: 'graphql',
             value: 'http://example.com/graphql',
             context: new ActionContext({
-              [KeysGraphQLSource["context"].name]: {}
-            })
+              [KeysGraphQLSource.context.name]: {},
+            }),
           },
-          context: new ActionContext()
+          context: new ActionContext(),
         })).resolves.toFailTest('actor requires a graphql schema to be present in the context.');
       });
 
@@ -89,10 +87,10 @@ describe('ActorQuerySourceIdentifyGraphql', () => {
             type: 'graphql',
             value: 'http://example.com/graphql',
             context: new ActionContext({
-              [KeysGraphQLSource["schema"].name]: ""
-            })
+              [KeysGraphQLSource.schema.name]: '',
+            }),
           },
-          context: new ActionContext()
+          context: new ActionContext(),
         })).resolves.toFailTest('actor requires a graphql schema context to be present in the context.');
       });
 
@@ -100,11 +98,11 @@ describe('ActorQuerySourceIdentifyGraphql', () => {
         await expect(actor.test({
           querySourceUnidentified: {
             type: 'sparql',
-            value: 'http://example.com/sparql'
+            value: 'http://example.com/sparql',
           },
-          context: new ActionContext()
+          context: new ActionContext(),
         })).resolves.toFailTest('actor requires a single query source with graphql type to be present in the context.');
-      })
+      });
     });
 
     describe('run', () => {
@@ -114,17 +112,17 @@ describe('ActorQuerySourceIdentifyGraphql', () => {
             type: 'graphql',
             value: 'http://example.com/graphql',
             context: new ActionContext({
-              [KeysGraphQLSource["schema"].name]: "type Subscription { dummy: String }",
-              [KeysGraphQLSource["context"].name]: {}
-            })
+              [KeysGraphQLSource.schema.name]: 'type Subscription { dummy: String }',
+              [KeysGraphQLSource.context.name]: {},
+            }),
           },
           context: new ActionContext({
-            [KeysInitQuery["dataFactory"].name]: DF
-          })
+            [KeysInitQuery.dataFactory.name]: DF,
+          }),
         });
 
         expect(result.querySource.source).toBeInstanceOf(QuerySourceGraphql);
-      })
+      });
     });
   });
 });

@@ -2,7 +2,6 @@ import type { ComunicaDataFactory } from '@comunica/types';
 import type * as RDF from '@rdfjs/types';
 import type { GraphQLArgument, GraphQLField, GraphQLObjectType } from 'graphql';
 import { getNamedType, GraphQLID, buildSchema, isScalarType, GraphQLNonNull } from 'graphql';
-import { json } from 'node:stream/consumers';
 import type { Algebra } from 'sparqlalgebrajs';
 
 export class SparqlQueryConverter {
@@ -18,6 +17,8 @@ export class SparqlQueryConverter {
     scalar BoxedLiteral
     scalar RDFNode
     scalar DateTime
+    scalar Date
+    scalar Time
     ${schema_source}
     `;
     const schema = buildSchema(schema_source, {
@@ -104,9 +105,8 @@ class Field {
     this.fieldType = <GraphQLObjectType>getNamedType(field.type);
     this.idArg = field.args.find(arg => getNamedType(arg.type) === GraphQLID);
     if (this.idArg === undefined && !isScalarType(this.fieldType)) {
-      this.idField = Object.values(this.fieldType.getFields()).find(field => 
-        getNamedType(field.type) === GraphQLID
-      );
+      this.idField = Object.values(this.fieldType.getFields()).find(field =>
+        getNamedType(field.type) === GraphQLID);
     }
   }
 
@@ -129,7 +129,7 @@ class Field {
 
   public toQuery(node: TreeNode): [string, Record<string, string>, Record<string, RawRDF>] {
     const varMap: Record<string, string> = {};
-    let filterMap: Record<string, RawRDF> = {};
+    const filterMap: Record<string, RawRDF> = {};
     let query = this.field.name;
 
     if (Object.keys(node.children).length > 0) {
@@ -157,7 +157,9 @@ class Field {
           varMap[variable] = `${this.field.name}_${mappedId}`;
         }
         // Update filters
-        filterMap = { ...filterMap, ...childFilterMap };
+        for (const [ filterId, filterValue ] of Object.entries(childFilterMap)) {
+          filterMap[`${this.field.name}_${filterId}`] = filterValue;
+        }
       }
 
       query += '} ';
@@ -201,9 +203,8 @@ class Field {
   public withId(subj: RDF.Term): boolean {
     if (subj.termType === 'Variable') {
       return !this.idArg || !(this.idArg.type instanceof GraphQLNonNull);
-    } else {
-      return this.idArg !== undefined || this.idField !== undefined;
     }
+    return this.idArg !== undefined || this.idField !== undefined;
   }
 
   public withPredNode(pred: string, node: TreeNode): boolean {
