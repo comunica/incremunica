@@ -300,6 +300,26 @@ describe('ActorOptimizeQueryOperationAssignSourcesExhaustive', () => {
         expect(getOperationSource(operationOut.insert[0])).not.toBe(source1);
         expect(getOperationSource(operationOut.where)).toBe(source1);
       });
+
+      it('for a delete-insert query with undefined where', async() => {
+        const operationIn = AF.createDeleteInsert(
+          [
+            AF.createPattern(DF.namedNode('s1'), DF.namedNode('p1'), DF.namedNode('o1')),
+          ],
+          [
+            AF.createPattern(DF.namedNode('s1'), DF.namedNode('p1'), DF.namedNode('o1')),
+          ],
+          undefined,
+        );
+        const selectorShapes = [
+          await source1.source.getSelectorShape(emptyContext),
+        ];
+        const operationOut = actor.assignExhaustive(AF, operationIn, [ source1 ], selectorShapes);
+        expect(operationOut.type).toEqual(Algebra.types.DELETE_INSERT);
+        expect(operationOut.where).toBeUndefined();
+        expect(getOperationSource(operationOut.delete[0])).not.toBe(source1);
+        expect(getOperationSource(operationOut.insert[0])).not.toBe(source1);
+      });
     });
   });
 });
