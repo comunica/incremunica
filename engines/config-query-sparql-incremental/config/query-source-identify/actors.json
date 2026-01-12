@@ -5,14 +5,16 @@
 
     "https://linkedsoftwaredependencies.org/bundles/npm/@incremunica/config-query-sparql-incremental/^2.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@incremunica/actor-query-source-identify-streaming-rdfjs/^2.0.0/components/context.jsonld",
-    "https://linkedsoftwaredependencies.org/bundles/npm/@incremunica/actor-query-source-identify-stream/^2.0.0/components/context.jsonld"
+    "https://linkedsoftwaredependencies.org/bundles/npm/@incremunica/actor-query-source-identify-stream/^2.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@incremunica/actor-query-source-identify-graphql/^2.0.0/components/context.jsonld"
   ],
   "@graph": [
     {
       "import": [
         "ccqs:config/query-source-identify/actors/hypermedia.json",
         "icqsi:config/query-source-identify/actors/stream.json",
-        "icqsi:config/query-source-identify/actors/streaming-rdfjs.json"
+        "icqsi:config/query-source-identify/actors/streaming-rdfjs.json",
+        "icqsi:config/query-source-identify/actors/graphql.json"
       ]
     },
     {
@@ -23,6 +25,11 @@
     {
       "@id": "urn:comunica:default:query-source-identify/actors#stream",
       "@type": "ActorQuerySourceIdentifyStream",
+      "beforeActors": { "@id": "urn:comunica:default:query-source-identify/actors#hypermedia" }
+    },
+    {
+      "@id": "urn:comunica:default:query-source-identify/actors#graphql",
+      "@type": "ActorQuerySourceIdentifyGraphql",
       "beforeActors": { "@id": "urn:comunica:default:query-source-identify/actors#hypermedia" }
     }
   ]
