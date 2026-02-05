@@ -1,5 +1,6 @@
 {
   "private": true,
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "repository": "https://github.com/comunica/incremunica/",
   "workspaces": [
     "engines/*",
@@ -23,7 +24,7 @@
     "build-watch:ts": "tsc --watch",
     "build-watch:components": "nodemon -e d.ts --exec yarn run build:components",
     "publish": "yarn install && yarn pre-commit && yarn publish-release",
-    "publish-release": "lerna publish",
+    "publish-release": "IGNORE_TODO=1 lerna publish",
     "publish-bare": "lerna exec -- npm publish --silent",
     "publish-canary": "yarn run build && lerna version prerelease --preid alpha.$(.github/get-next-alpha-version.sh) --exact --ignore-scripts --force-publish --no-push --no-git-tag-version --yes && git update-index --assume-unchanged $(git ls-files | tr '\\n' ' ') && lerna publish from-package --no-git-reset --pre-dist-tag next --force-publish --no-push --no-git-tag-version --yes && git update-index --no-assume-unchanged $(git ls-files | tr '\\n' ' ') && git checkout .",
     "doc": "typedoc",

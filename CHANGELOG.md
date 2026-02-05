@@ -1,6 +1,20 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.1"></a>
+## [v2.3.1](https://github.com/comunica/incremunica/compare/v2.3.0...v2.3.1) - 2026-02-05
+
+* [chore: disable todo linting rule for publish](https://github.com/comunica/incremunica/commit/9073431377d5317e1ed9e747674e33ed853abfb6)
+* [update github actions node versions](https://github.com/comunica/incremunica/commit/4ba1e63a47560bbc2be752ecaa2015651dbc5b4a)
+* [Merge pull request #144 from ponachte/graphql-support](https://github.com/comunica/incremunica/commit/ab66c7763b2bf8d76c3f2b3e9f1b35ebf5efec4d)
+* [add test with operation where set to undefined](https://github.com/comunica/incremunica/commit/0b215a896fda2dcf1b3fe150ebc92b6ed8cd2589)
+* [actor-query-source-identify-graphql 100% test coverage](https://github.com/comunica/incremunica/commit/e1b27f41ca9390253ae5dee8b9f8055e5abac877)
+* [ActorQuerySourceIdentifyGraphql test 100% converage](https://github.com/comunica/incremunica/commit/ecbe6c0cff07f526785ce4293785abdc325c01df)
+* [converter 100% coverage](https://github.com/comunica/incremunica/commit/c11a45cd93febfa70bfae14c200db2da5b95ed10)
+* [add graphql support](https://github.com/comunica/incremunica/commit/5b02b0153cd47e039817fc421acb6e1abf92bcdb)
+* [Merge pull request #142 from comunica/next/minor](https://github.com/comunica/incremunica/commit/2ab27de439a97baa07fcee2ae0f6192dc68c4bcb)
+* [Merge pull request #141 from comunica/next/minor](https://github.com/comunica/incremunica/commit/c3230d665a2775f169a8da388bcdd9d0db227f3f)
+
 <a name="v2.3.0"></a>
 ## [v2.3.0](https://github.com/comunica/incremunica/compare/v2.2.4...v2.3.0) - 2025-07-16
 

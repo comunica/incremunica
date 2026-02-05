@@ -1,14 +1,18 @@
 const config = require('@rubensworks/eslint-config');
 
+const ignoreTodo = process.env.IGNORE_TODO === '1';
+
 module.exports = config([
   {
     files: [ '**/*.ts', '**/*.js' ],
     rules: {
-      'unicorn/expiring-todo-comments': [ 'error', {
-        ignoreDatesOnPullRequests: false,
-        terms: [ 'todo' ],
-        allowWarningComments: false,
-      }],
+      'unicorn/expiring-todo-comments': ignoreTodo ?
+        'off' :
+          [ 'error', {
+            ignoreDatesOnPullRequests: false,
+            terms: [ 'todo' ],
+            allowWarningComments: false,
+          }],
     },
   },
   {

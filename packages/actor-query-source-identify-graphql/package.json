@@ -1,0 +1,55 @@
+{
+  "name": "@incremunica/actor-query-source-identify-graphql",
+  "version": "2.3.1",
+  "description": "A graphql query-source-identify actor",
+  "lsd:module": true,
+  "license": "MIT",
+  "homepage": "https://comunica.github.io/incremunica/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/comunica/incremunica.git",
+    "directory": "packages/actor-query-source-identify-graphql"
+  },
+  "bugs": {
+    "url": "https://github.com/comunica/incremunica/issues"
+  },
+  "keywords": [
+    "incremunica",
+    "actor",
+    "query-source-identify",
+    "graphql",
+    "graphql-ld"
+  ],
+  "sideEffects": false,
+  "main": "lib/index.js",
+  "typings": "lib/index",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "components",
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "lib/**/*.js.map"
+  ],
+  "scripts": {
+    "build": "yarn run build:ts && yarn run build:components",
+    "build:ts": "node \"../../node_modules/typescript/bin/tsc\"",
+    "build:components": "componentsjs-generator"
+  },
+  "dependencies": {
+    "@comunica/bus-http": "^4.2.0",
+    "@comunica/bus-merge-bindings-context": "^4.2.0",
+    "@comunica/bus-query-source-identify": "^4.2.0",
+    "@comunica/context-entries": "^4.2.0",
+    "@comunica/core": "^4.2.0",
+    "@comunica/types": "^4.2.0",
+    "@comunica/utils-bindings-factory": "^4.2.0",
+    "@comunica/utils-metadata": "^4.2.0",
+    "@incremunica/data-structures": "^2.2.2",
+    "@rdfjs/types": "*",
+    "asynciterator": "^3.9.0",
+    "graphql": "^16.6.0",
+    "sparqlalgebrajs": "^4.3.8"
+  }
+}

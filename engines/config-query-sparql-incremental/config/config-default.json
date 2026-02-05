@@ -23,7 +23,7 @@
     "ccqs:config/init/actors.json",
     "icqsi:config/merge-bindings-context/actors.json",
     "ccqs:config/merge-bindings-context/mediators.json",
-    "ccqs:config/optimize-query-operation/actors.json",
+    "icqsi:config/optimize-query-operation/actors.json",
     "ccqs:config/optimize-query-operation/mediators.json",
     "icqsi:config/query-operation/actors.json",
     "ccqs:config/query-operation/mediators.json",
