@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-query-source-identify-graphql",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "A graphql query-source-identify actor",
   "lsd:module": true,
   "license": "MIT",

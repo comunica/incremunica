@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/config-query-sparql-incremental",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "default configuration files for Comunica SPARQL Incremental",
   "lsd:module": true,
   "license": "MIT",
