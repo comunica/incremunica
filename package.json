@@ -73,7 +73,7 @@
     "nodemon": "^3.0.0",
     "npm-check-updates": "^17.1.11",
     "pre-commit": "^1.2.2",
-    "rdf-data-factory": "^1.1.1",
+    "rdf-data-factory": "^2.0.0",
     "rdf-quad": "^2.0.0",
     "rdf-terms": "^2.0.0",
     "readable-stream": "^4.3.0",
