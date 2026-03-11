@@ -46,6 +46,7 @@
     "@comunica/types": "^4.2.0",
     "@comunica/utils-bindings-factory": "^4.2.0",
     "@comunica/utils-metadata": "^4.2.0",
+    "@comunica-graphql/sparql2graphql-converter": "^1.1.1",
     "@incremunica/data-structures": "^2.2.2",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",

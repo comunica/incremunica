@@ -4,9 +4,10 @@ import type { BindingsFactory } from '@comunica/utils-bindings-factory';
 import { Queue } from '@incremunica/data-structures';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
-import type { RawRDF } from './SparqlQueryConverter';
-
-export type Resource = Record<string, string | RawRDF>;
+import { QueryMapper } from '@comunica-graphql/sparql2graphql-converter';
+import { Algebra } from 'sparqlalgebrajs';
+import type { ResponseMapper } from '@comunica-graphql/sparql2graphql-converter';
+import { KeysBindings } from '@incremunica/context-entries';
 
 export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   protected readonly source: string;
@@ -14,41 +15,62 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   protected readonly context: IActionContext;
 
   private readonly variables: RDF.Variable[];
-  private readonly varMap: Record<string, string>;
-  private readonly filterMap: Record<string, RawRDF>;
   private readonly dataFactory: ComunicaDataFactory;
   private readonly bindingsFactory: BindingsFactory;
 
-  protected query: string;
+  protected addQuery: string | undefined;
+  protected addRespMapper: ResponseMapper | undefined;
+  protected delQuery: string | undefined;
+  protected delRespMapper: ResponseMapper | undefined;
+  protected initQuery: string | undefined;
+  protected initRespMapper: ResponseMapper | undefined;
+
   protected buffer: Queue<RDF.Bindings>;
   protected decoder: TextDecoder;
 
   public constructor(
     source: string,
-    query: string,
     context: IActionContext,
+    queryMapper: QueryMapper,
+    operation: Algebra.Operation,
     mediatorHttp: MediatorHttp,
     variables: RDF.Variable[],
-    varMap: Record<string, string>,
-    filterMap: Record<string, RawRDF>,
     dataFactory: ComunicaDataFactory,
     bindingsFactory: BindingsFactory,
   ) {
     super();
     this.source = source;
-    this.query = query;
     this.mediatorHttp = mediatorHttp;
     this.context = context;
     this.variables = variables;
-    this.varMap = varMap;
-    this.filterMap = filterMap;
     this.dataFactory = dataFactory;
     this.bindingsFactory = bindingsFactory;
+
+    // Map addition subscription if possible
+    try {
+      [ this.addQuery, this.addRespMapper ] = queryMapper.subscribeOperation(operation, "addition")[0];
+    } catch {
+      this.addQuery = this.addRespMapper = undefined;
+    }
+
+    // Map deletion subscription if possible
+    try {
+      [ this.delQuery, this.delRespMapper ] = queryMapper.subscribeOperation(operation, "deletion")[0];
+    } catch {
+      this.delQuery = this.delRespMapper = undefined;
+    }
+    
+    // Map initial query if possible
+    try {
+      [ this.initQuery, this.initRespMapper ] = queryMapper.queryOperation(operation)[0];
+    } catch {
+      this.initQuery = this.initRespMapper = undefined;
+    }
 
     this.buffer = new Queue<RDF.Bindings>();
     this.readable = false;
     this.decoder = new TextDecoder('utf-8');
-    this.subscribe().catch((err) => {
+    this.query(this.initQuery).catch((err) => {
       this.handleError(err);
     });
   }
@@ -64,59 +86,23 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     return bindings;
   }
 
-  private resourceToBindings(resource: Resource): boolean {
-    const bindings: Record<string, RDF.Term> = {};
-
-    // --- Filter resources based on filterMap ---
-    for (const filterId of Object.keys(this.filterMap)) {
-      const filterValue: RawRDF = this.filterMap[filterId];
-      const resourceValue = <RawRDF> resource[filterId];
-
-      if (filterValue['@id']) {
-        if (resourceValue['@id'] !== filterValue['@id']) {
-          // Doesn't match, skip resource
-          return false;
-        }
-      } else if (filterValue['@type'] && filterValue['@value'] && (
-        resourceValue['@value'] !== filterValue['@value'] ||
-          resourceValue['@type'] !== filterValue['@type']
-      )) {
-        // Doesn't match, skip resource
-        return false;
-      }
+  private async startSubscription(): Promise<void> {
+    if (this.addQuery && this.addRespMapper) {
+      this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
+        this.handleError(err);
+      });
     }
-
-    // --- Convert resource values to RDF terms ---
-    for (const variable of this.variables) {
-      const varName = variable.value;
-      const value = resource[this.varMap[varName]];
-
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        if (value['@id']) {
-          bindings[varName] = this.dataFactory.namedNode(value['@id']);
-        } else if (value['@value'] && value['@type']) {
-          const valueType = this.dataFactory.namedNode(value['@type']);
-          bindings[varName] = this.dataFactory.literal(value['@value'], valueType);
-        } else {
-          throw new Error(
-            `Invalid RawRDF format for variable "${varName}": ${JSON.stringify(value)}`,
-          );
-        }
-      } else {
-        bindings[varName] = termFromValue(value, this.dataFactory);
-      }
+    if (this.delQuery && this.delRespMapper) {
+      this.subscribe(this.delQuery, this.delRespMapper, false).catch((err) => {
+        this.handleError(err);
+      });
     }
-
-    this.buffer.push(this.bindingsFactory.bindings(
-      Object.entries(bindings).map(([ key, term ]) => [ this.dataFactory.variable(key), term ]),
-    ));
-    return true;
   }
 
-  private async subscribe(): Promise<void> {
+  private async subscribe(query: string, resMapper: ResponseMapper, isAddition: boolean): Promise<void> {
     const body = {
       '@context': {},
-      query: `subscription { ${this.query} }`,
+      query: query,
     };
 
     const init: RequestInit = {
@@ -179,9 +165,15 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
           if (eventType === 'next') {
             const json = JSON.parse(dataStr);
-            const resource = flattenData(json.data);
+            const bindings = resMapper.dataToBindings(
+              json.data, 
+              this.variables, 
+              this.dataFactory, 
+              this.bindingsFactory
+            );
+            bindings.map(b => b.setContextEntry(KeysBindings.isAddition, isAddition));
 
-            if (this.resourceToBindings(resource)) {
+            if (bindings.length > 0) {
               this.readable = true;
             }
           }
@@ -193,87 +185,248 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     });
   }
 
+  private async query(query: string | undefined): Promise<void> {
+    // Start subscriptions stream if initial query is done
+    if (!query) {
+      this.startSubscription();
+      return;
+    }
+
+    // Get query response
+    const body = {
+      '@context': {},
+      query: query,
+    };
+
+    const init: RequestInit = {
+      headers: new Headers({ 'Content-Type': 'application/json' }),
+      method: 'POST',
+      body: JSON.stringify(body),
+    };
+
+    const response = await this.mediatorHttp.mediate({
+      input: this.source,
+      init,
+      context: this.context,
+    });
+
+    if (!response.ok) {
+      // Try to read the body for extra error info
+      let errorBody: any;
+      try {
+        errorBody = await response.text();
+      } catch {
+        errorBody = '<failed to read body>';
+      }
+
+      throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorBody}`);
+    }
+
+    // Parse response and map to bindings
+    const json = await response.json();
+    const bindings = this.initRespMapper!.dataToBindings(
+      json.data,
+      this.variables,
+      this.dataFactory,
+      this.bindingsFactory
+    );
+
+    bindings.forEach(b => this.buffer.push(b));
+
+    if (bindings.length > 0) {
+      this.readable = true;
+    }
+
+    // Handle pagination
+    const paginations = json?.extensions?.pagination?.filter((p: any) => p?.next);
+
+    // If no pagination, start the subscription stream
+    if (!paginations || paginations.length < 1) {
+      this.query(undefined);
+      return
+    }
+
+    // Find the pagination with the deepest path
+    const deepestPagination = paginations.reduce((deepest: any, current: any) => {
+      const currentDepth = current.path.split('/').filter(Boolean).length;
+      const deepestDepth = deepest.path.split('/').filter(Boolean).length;
+      return currentDepth > deepestDepth ? current : deepest;
+    });
+
+    // Update query cursor
+    const nextQuery = updateQueryCursor(query, deepestPagination.path, deepestPagination.next);
+    this.query(nextQuery);
+  }
+
   private handleError(error: Error): void {
     this.emit('error', error);
     this.close();
   }
 }
 
-function flattenData(obj: any, prefix = ''): Resource {
-  const result: Resource = {};
+function updateQueryCursor(query: string, path?: string, newCursor = ''): string {
+  const pathParts = path ? path.replace(/^\/+/u, '').split('/') : [];
 
-  function recurse(value: any, keyPrefix: string): void {
-    if (Array.isArray(value)) {
-      // If an array is expected to represent one resource,
-      // just flatten each element into the same object
-      for (const el of value) {
-        recurse(el, keyPrefix);
+  function insertCursorAtField(source: string, parts: string[], depth = 0): string {
+    const field = parts[0];
+    let index = 0;
+    let inString = false;
+
+    while (index < source.length) {
+      const char = source[index];
+
+      // Handle string quotes properly (avoid modifying inside strings)
+      if (char === '"') {
+        inString = !inString;
+        index++;
+        continue;
       }
-      return;
-    }
 
-    if (typeof value !== 'object' || value === null) {
-      // Primitive → assign directly
-      result[keyPrefix] = value;
-      return;
-    }
+      // Root-level query injection
+      if (parts.length === 0 && depth === 0) {
+        // Find the first field in the query body
+        const fieldMatch = /\b([_A-Za-z][_0-9A-Za-z]*)\b\s*(\(|\{)/u.exec(source);
+        if (!fieldMatch) {
+          throw new Error('Unable to locate root field in query.');
+        }
 
-    // Object → recurse over keys
-    for (const [ key, val ] of Object.entries(value)) {
-      const fullKey = keyPrefix ? `${keyPrefix}_${key}` : key;
+        const fieldName = fieldMatch[1];
+        const matchStart = fieldMatch.index;
+        const matchEnd = matchStart + fieldName.length;
+        let i = matchEnd;
 
-      if (key === '_rawRDF' && typeof val === 'object' && val !== null) {
-        // Preserve RawRDF as-is
-        result[fullKey] = <RawRDF> val;
-      } else {
-        recurse(val, fullKey);
+        // Skip whitespace
+        while (/\s/u.test(source[i])) {
+          i++;
+        }
+
+        // Check for existing arguments
+        if (source[i] === '(') {
+          let parenCount = 1;
+          const argsStart = i;
+          i++;
+
+          while (i < source.length && parenCount > 0) {
+            if (source[i] === '(') {
+              parenCount++;
+            } else if (source[i] === ')') {
+              parenCount--;
+            }
+            i++;
+          }
+
+          const argsEnd = i;
+          const argsStr = source
+            .slice(argsStart + 1, argsEnd - 1)
+            .split(',')
+            .map(arg => arg.trim())
+            .filter(arg => arg && !arg.startsWith('cursor:'));
+
+          argsStr.push(`cursor: "${newCursor}"`);
+          const updatedField = `${fieldName}(${argsStr.join(', ')})`;
+
+          return (
+            source.slice(0, matchStart) +
+            updatedField +
+            source.slice(argsEnd)
+          );
+        }
+        // No args → inject a new one
+        const updatedField = `${fieldName}(cursor: "${newCursor}")`;
+        return (
+          source.slice(0, matchStart) +
+            updatedField +
+            source.slice(matchEnd)
+        );
       }
+
+      // Match target field at current depth
+      if (!inString && field && new RegExp(`^\\b${field}\\b`, 'u').test(source.slice(index))) {
+        const matchStart = index;
+        const matchEnd = index + field.length;
+
+        // Find args and body
+        let argsStart = -1;
+        let argsEnd = -1;
+        let bodyStart = -1;
+
+        index = matchEnd;
+
+        while (/\s/u.test(source[index])) {
+          index++;
+        }
+
+        // Handle arguments
+        if (source[index] === '(') {
+          argsStart = index;
+          let parenCount = 1;
+          index++;
+          while (index < source.length && parenCount > 0) {
+            if (source[index] === '(') {
+              parenCount++;
+            } else if (source[index] === ')') {
+              parenCount--;
+            }
+            index++;
+          }
+          argsEnd = index;
+        }
+
+        while (/\s/u.test(source[index])) {
+          index++;
+        }
+
+        // Handle body
+        if (source[index] === '{') {
+          bodyStart = index;
+        }
+
+        // Leaf field — apply cursor
+        if (parts.length === 1) {
+          let updatedField = '';
+
+          if (argsStart === -1) {
+            updatedField = `${field}(cursor: "${newCursor}")`;
+          } else {
+            const argsStr = source
+              .slice(argsStart + 1, argsEnd - 1)
+              .split(',')
+              .map(arg => arg.trim())
+              .filter(arg => arg && !arg.startsWith('cursor:'));
+            argsStr.push(`cursor: "${newCursor}"`);
+            updatedField = `${field}(${argsStr.join(', ')})`;
+          }
+
+          return source.slice(0, matchStart) + updatedField + source.slice(index);
+        }
+
+        // Recursive case
+        if (bodyStart !== -1) {
+          let braceCount = 1;
+          let bodyEnd = bodyStart + 1;
+          while (bodyEnd < source.length && braceCount > 0) {
+            if (source[bodyEnd] === '{') {
+              braceCount++;
+            } else if (source[bodyEnd] === '}') {
+              braceCount--;
+            }
+            bodyEnd++;
+          }
+
+          const before = source.slice(0, bodyStart + 1);
+          const body = source.slice(bodyStart + 1, bodyEnd - 1);
+          const after = source.slice(bodyEnd - 1);
+
+          const newBody = insertCursorAtField(body, parts.slice(1), depth + 1);
+          return before + newBody + after;
+        }
+      }
+
+      index++;
     }
+
+    throw new Error(`Unable to update query with cursor ${newCursor} at path ${path}`);
   }
 
-  recurse(obj, prefix);
-  return result;
-}
-
-function termFromValue(value: any, dataFactory: ComunicaDataFactory): RDF.Term {
-  const XSD = 'http://www.w3.org/2001/XMLSchema#';
-
-  if (typeof value === 'number') {
-    if (Number.isInteger(value)) {
-      return dataFactory.literal(
-        value.toString(),
-        dataFactory.namedNode(`${XSD}integer`),
-      );
-    }
-
-    return dataFactory.literal(
-      value.toString(),
-      dataFactory.namedNode(`${XSD}decimal`),
-    );
-  }
-
-  if (typeof value === 'boolean') {
-    return dataFactory.literal(
-      value ? 'true' : 'false',
-      dataFactory.namedNode(`${XSD}boolean`),
-    );
-  }
-
-  // Xsd:dateTime (e.g. 2024-01-01T12:30:00Z)
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?$/u.test(value)) {
-    return dataFactory.literal(value, dataFactory.namedNode(`${XSD}dateTime`));
-  }
-
-  // Xsd:date (e.g. 2024-01-01)
-  if (/^\d{4}-\d{2}-\d{2}$/u.test(value)) {
-    return dataFactory.literal(value, dataFactory.namedNode(`${XSD}date`));
-  }
-
-  // Xsd:time (e.g. 12:30:00)
-  if (/^\d{2}:\d{2}:\d{2}(?:\.\d+)?$/u.test(value)) {
-    return dataFactory.literal(value, dataFactory.namedNode(`${XSD}time`));
-  }
-
-  // Default string
-  return dataFactory.literal(value, dataFactory.namedNode(`${XSD}string`));
+  return insertCursorAtField(query, pathParts);
 }

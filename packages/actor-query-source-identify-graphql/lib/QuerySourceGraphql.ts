@@ -13,7 +13,7 @@ import type { AsyncIterator } from 'asynciterator';
 import { Algebra, Util, Factory } from 'sparqlalgebrajs';
 import type { Operation, Ask, Update } from 'sparqlalgebrajs/lib/algebra';
 import { AsyncResourceIterator } from './AsyncResourceIterator';
-import { SparqlQueryConverter } from './SparqlQueryConverter';
+import { QueryMapper } from "@comunica-graphql/sparql2graphql-converter";
 
 export class QuerySourceGraphql implements IQuerySource {
   protected readonly selectorShape: FragmentSelectorShape;
@@ -26,7 +26,7 @@ export class QuerySourceGraphql implements IQuerySource {
   private readonly bindingsFactory: BindingsFactory;
   private readonly mediatorHttp: MediatorHttp;
 
-  private readonly queryConverter: SparqlQueryConverter;
+  private readonly queryMapper: QueryMapper;
 
   public constructor(
     source: string,
@@ -80,7 +80,7 @@ export class QuerySourceGraphql implements IQuerySource {
       ],
     };
 
-    this.queryConverter = new SparqlQueryConverter(dataFactory, schema_context, schema_source);
+    this.queryMapper = new QueryMapper(schema_source, schema_context);
     this.selectorShape = this.schemaSelectorShape;
   }
 
@@ -107,45 +107,16 @@ export class QuerySourceGraphql implements IQuerySource {
     variables: RDF.Variable[],
     context: IActionContext,
   ): AsyncIterator<RDF.Bindings> {
-    function extractPatterns(op: Algebra.Operation): Algebra.Pattern[] {
-      switch (op.type) {
-        case Algebra.types.PROJECT:
-          return extractPatterns(op.input);
-        case Algebra.types.BGP:
-          return op.patterns;
-        case Algebra.types.PATTERN:
-          return [ op ];
-        case Algebra.types.JOIN: {
-          const patterns: Algebra.Pattern[] = [];
-          for (const child of op.input) {
-            patterns.push(...extractPatterns(child));
-          }
-          return patterns;
-        }
-        default:
-          throw new Error(`Unsupported operation type: ${op.type}`);
-      }
-    }
-
-    const patterns = extractPatterns(operation);
-    const converted = this.queryConverter.convertOperation(patterns);
-
-    // TODO [2026-09-01]: if more then one conversion possible, give them all to the iterator
-    // so it can try another when one fails.
-    if (converted.length > 0) {
-      const [ query, varMap, filterMap ] = converted[0];
       return new AsyncResourceIterator(
         this.source,
-        query,
         context,
+        this.queryMapper,
+        operation,
         this.mediatorHttp,
         variables,
-        varMap,
-        filterMap,
         this.dataFactory,
         this.bindingsFactory,
       );
-    }
 
     throw new Error(`Unable to convert SPARQL Query to Graphql Query for source ${this.source}`);
   }
