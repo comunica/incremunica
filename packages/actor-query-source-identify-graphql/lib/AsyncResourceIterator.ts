@@ -1,13 +1,12 @@
 import type { MediatorHttp } from '@comunica/bus-http';
 import type { IActionContext, ComunicaDataFactory } from '@comunica/types';
 import type { BindingsFactory } from '@comunica/utils-bindings-factory';
+import type { QueryMapper, ResponseMapper } from '@comunica-graphql/sparql2graphql-converter';
+import { KeysBindings } from '@incremunica/context-entries';
 import { Queue } from '@incremunica/data-structures';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
-import { QueryMapper } from '@comunica-graphql/sparql2graphql-converter';
-import { Algebra } from 'sparqlalgebrajs';
-import type { ResponseMapper } from '@comunica-graphql/sparql2graphql-converter';
-import { KeysBindings } from '@incremunica/context-entries';
+import type { Algebra } from 'sparqlalgebrajs';
 
 export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   protected readonly source: string;
@@ -51,18 +50,18 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
     // Map addition subscription if possible
     try {
-      [ this.addQuery, this.addRespMapper ] = queryMapper.subscribeOperation(operation, "addition")[0];
+      [ this.addQuery, this.addRespMapper ] = queryMapper.subscribeOperation(operation, 'addition')[0];
     } catch {
       this.addQuery = this.addRespMapper = undefined;
     }
 
     // Map deletion subscription if possible
     try {
-      [ this.delQuery, this.delRespMapper ] = queryMapper.subscribeOperation(operation, "deletion")[0];
+      [ this.delQuery, this.delRespMapper ] = queryMapper.subscribeOperation(operation, 'deletion')[0];
     } catch {
       this.delQuery = this.delRespMapper = undefined;
     }
-    
+
     // Map initial query if possible
     try {
       [ this.initQuery, this.initRespMapper ] = queryMapper.queryOperation(operation)[0];
@@ -73,9 +72,18 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     this.buffer = new Queue<RDF.Bindings>();
     this.readable = false;
     this.decoder = new TextDecoder('utf-8');
+
+    // Start initial query
     this.query(this.initQuery).catch((err) => {
       this.handleError(err);
     });
+
+    // Start deletion stream
+    if (this.delQuery && this.delRespMapper) {
+      this.subscribe(this.delQuery, this.delRespMapper, false).catch((err) => {
+        this.handleError(err);
+      });
+    }
   }
 
   public override read(): RDF.Bindings | null {
@@ -89,25 +97,10 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     return bindings;
   }
 
-  private async startSubscription(): Promise<void> {
-    console.log("Starting subscription");
-    if (this.addQuery && this.addRespMapper) {
-      console.log("Start addition stream");
-      this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
-        this.handleError(err);
-      });
-    }
-    if (this.delQuery && this.delRespMapper) {
-      this.subscribe(this.delQuery, this.delRespMapper, false).catch((err) => {
-        this.handleError(err);
-      });
-    }
-  }
-
   private async subscribe(query: string, resMapper: ResponseMapper, isAddition: boolean): Promise<void> {
     const body = {
       '@context': this.queryContext,
-      query: query,
+      query,
     };
 
     const init: RequestInit = {
@@ -170,17 +163,17 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
           if (eventType === 'next') {
             const json = JSON.parse(dataStr);
-            console.log("Got data: ", JSON.stringify(json));
             const bindings = resMapper.dataToBindings(
-              json.data, 
-              this.variables, 
-              this.dataFactory, 
-              this.bindingsFactory
+              json.data,
+              this.variables,
+              this.dataFactory,
+              this.bindingsFactory,
             );
-            console.log(`\t-> Parsed ${bindings.length} bindings`);
 
             bindings.map(b => b.setContextEntry(KeysBindings.isAddition, isAddition));
-            bindings.forEach(b => this.buffer.push(b));
+            for (const b of bindings) {
+              this.buffer.push(b);
+            }
 
             if (bindings.length > 0) {
               this.readable = true;
@@ -194,17 +187,21 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     });
   }
 
-  private async query(query: string | undefined): Promise<void> {
-    // Start subscriptions stream if initial query is done
+  private async query(query?: string): Promise<void> {
+    // Start additions subscriptions stream if initial query is done
     if (!query) {
-      this.startSubscription();
+      if (this.addQuery && this.addRespMapper) {
+        this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
+          this.handleError(err);
+        });
+      }
       return;
     }
 
     // Get query response
     const body = {
       '@context': this.queryContext,
-      query: query,
+      query,
     };
 
     const init: RequestInit = {
@@ -237,11 +234,13 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       json.data,
       this.variables,
       this.dataFactory,
-      this.bindingsFactory
+      this.bindingsFactory,
     );
 
     bindings.map(b => b.setContextEntry(KeysBindings.isAddition, true));
-    bindings.forEach(b => this.buffer.push(b));
+    for (const b of bindings) {
+      this.buffer.push(b);
+    }
 
     if (bindings.length > 0) {
       this.readable = true;
@@ -250,12 +249,14 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     // Handle pagination
     const paginations = json?.extensions?.pagination?.filter((p: any) => p?.next);
 
-    console.log("QUERY DONE - paginations -> ", paginations);
-
-    // If no pagination, start the subscription stream
-    if (!paginations || paginations.length < 1) {
-      this.query(undefined);
-      return
+    // If no pagination, start the addition stream
+    if (!paginations || paginations.length === 0) {
+      if (this.addQuery && this.addRespMapper) {
+        this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
+          this.handleError(err);
+        });
+      }
+      return;
     }
 
     // Find the pagination with the deepest path
@@ -267,7 +268,9 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
     // Update query cursor
     const nextQuery = updateQueryCursor(query, deepestPagination.path, deepestPagination.next);
-    this.query(nextQuery);
+    this.query(nextQuery).catch((err) => {
+      this.handleError(err);
+    });
   }
 
   private handleError(error: Error): void {

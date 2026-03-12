@@ -8,12 +8,12 @@ import type {
 } from '@comunica/types';
 import type { BindingsFactory } from '@comunica/utils-bindings-factory';
 import { MetadataValidationState } from '@comunica/utils-metadata';
+import { QueryMapper } from '@comunica-graphql/sparql2graphql-converter';
 import type * as RDF from '@rdfjs/types';
 import type { AsyncIterator } from 'asynciterator';
 import { Algebra, Util, Factory } from 'sparqlalgebrajs';
 import type { Operation, Ask, Update } from 'sparqlalgebrajs/lib/algebra';
 import { AsyncResourceIterator } from './AsyncResourceIterator';
-import { QueryMapper } from "@comunica-graphql/sparql2graphql-converter";
 
 export class QuerySourceGraphql implements IQuerySource {
   protected readonly selectorShape: FragmentSelectorShape;
@@ -109,17 +109,17 @@ export class QuerySourceGraphql implements IQuerySource {
     variables: RDF.Variable[],
     context: IActionContext,
   ): AsyncIterator<RDF.Bindings> {
-      return new AsyncResourceIterator(
-        this.source,
-        context,
-        this.queryContext,
-        this.queryMapper,
-        operation,
-        this.mediatorHttp,
-        variables,
-        this.dataFactory,
-        this.bindingsFactory,
-      );
+    return new AsyncResourceIterator(
+      this.source,
+      context,
+      this.queryContext,
+      this.queryMapper,
+      operation,
+      this.mediatorHttp,
+      variables,
+      this.dataFactory,
+      this.bindingsFactory,
+    );
 
     throw new Error(`Unable to convert SPARQL Query to Graphql Query for source ${this.source}`);
   }
