@@ -18,6 +18,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   private readonly dataFactory: ComunicaDataFactory;
   private readonly bindingsFactory: BindingsFactory;
 
+  private readonly queryContext: Record<string, string>;
   protected addQuery: string | undefined;
   protected addRespMapper: ResponseMapper | undefined;
   protected delQuery: string | undefined;
@@ -31,6 +32,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   public constructor(
     source: string,
     context: IActionContext,
+    queryContext: Record<string, string>,
     queryMapper: QueryMapper,
     operation: Algebra.Operation,
     mediatorHttp: MediatorHttp,
@@ -45,6 +47,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     this.variables = variables;
     this.dataFactory = dataFactory;
     this.bindingsFactory = bindingsFactory;
+    this.queryContext = queryContext;
 
     // Map addition subscription if possible
     try {
@@ -87,7 +90,9 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   }
 
   private async startSubscription(): Promise<void> {
+    console.log("Starting subscription");
     if (this.addQuery && this.addRespMapper) {
+      console.log("Start addition stream");
       this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
         this.handleError(err);
       });
@@ -101,7 +106,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
   private async subscribe(query: string, resMapper: ResponseMapper, isAddition: boolean): Promise<void> {
     const body = {
-      '@context': {},
+      '@context': this.queryContext,
       query: query,
     };
 
@@ -165,13 +170,17 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
           if (eventType === 'next') {
             const json = JSON.parse(dataStr);
+            console.log("Got data: ", JSON.stringify(json));
             const bindings = resMapper.dataToBindings(
               json.data, 
               this.variables, 
               this.dataFactory, 
               this.bindingsFactory
             );
+            console.log(`\t-> Parsed ${bindings.length} bindings`);
+
             bindings.map(b => b.setContextEntry(KeysBindings.isAddition, isAddition));
+            bindings.forEach(b => this.buffer.push(b));
 
             if (bindings.length > 0) {
               this.readable = true;
@@ -194,7 +203,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
     // Get query response
     const body = {
-      '@context': {},
+      '@context': this.queryContext,
       query: query,
     };
 
@@ -231,6 +240,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       this.bindingsFactory
     );
 
+    bindings.map(b => b.setContextEntry(KeysBindings.isAddition, true));
     bindings.forEach(b => this.buffer.push(b));
 
     if (bindings.length > 0) {
@@ -239,6 +249,8 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
     // Handle pagination
     const paginations = json?.extensions?.pagination?.filter((p: any) => p?.next);
+
+    console.log("QUERY DONE - paginations -> ", paginations);
 
     // If no pagination, start the subscription stream
     if (!paginations || paginations.length < 1) {

@@ -26,6 +26,7 @@ export class QuerySourceGraphql implements IQuerySource {
   private readonly bindingsFactory: BindingsFactory;
   private readonly mediatorHttp: MediatorHttp;
 
+  private readonly queryContext: Record<string, string>;
   private readonly queryMapper: QueryMapper;
 
   public constructor(
@@ -80,6 +81,7 @@ export class QuerySourceGraphql implements IQuerySource {
       ],
     };
 
+    this.queryContext = schema_context;
     this.queryMapper = new QueryMapper(schema_source, schema_context);
     this.selectorShape = this.schemaSelectorShape;
   }
@@ -110,6 +112,7 @@ export class QuerySourceGraphql implements IQuerySource {
       return new AsyncResourceIterator(
         this.source,
         context,
+        this.queryContext,
         this.queryMapper,
         operation,
         this.mediatorHttp,
