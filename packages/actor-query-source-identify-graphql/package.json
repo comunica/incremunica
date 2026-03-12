@@ -49,6 +49,7 @@
     "@comunica/utils-metadata": "^4.2.0",
     "@incremunica/context-entries": "^2.3.0",
     "@incremunica/data-structures": "^2.2.2",
+    "@incremunica/user-tools": "^2.3.0",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",
     "graphql": "^16.6.0",

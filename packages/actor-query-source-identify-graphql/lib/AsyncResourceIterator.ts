@@ -18,15 +18,16 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   private readonly bindingsFactory: BindingsFactory;
 
   private readonly queryContext: Record<string, string>;
-  protected addQuery: string | undefined;
-  protected addRespMapper: ResponseMapper | undefined;
-  protected delQuery: string | undefined;
-  protected delRespMapper: ResponseMapper | undefined;
+  protected addQuery: string;
+  protected addRespMapper: ResponseMapper;
+  protected delQuery: string;
+  protected delRespMapper: ResponseMapper;
   protected initQuery: string | undefined;
   protected initRespMapper: ResponseMapper | undefined;
 
   protected buffer: Queue<RDF.Bindings>;
   protected decoder: TextDecoder;
+  protected activeSources = 0;
 
   public constructor(
     source: string,
@@ -48,18 +49,32 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     this.bindingsFactory = bindingsFactory;
     this.queryContext = queryContext;
 
-    // Map addition subscription if possible
+    // Map addition subscription
     try {
-      [ this.addQuery, this.addRespMapper ] = queryMapper.subscribeOperation(operation, 'addition')[0];
-    } catch {
-      this.addQuery = this.addRespMapper = undefined;
+      const converted = queryMapper.subscribeOperation(operation, 'addition');
+
+      if (converted.length === 0) {
+        throw new Error('No viable conversions found for this schema');
+      }
+
+      [ this.addQuery, this.addRespMapper ] = converted[0];
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to convert SPARQL query to addition subscription stream: ${message}`);
     }
 
-    // Map deletion subscription if possible
+    // Map deletion subscription
     try {
-      [ this.delQuery, this.delRespMapper ] = queryMapper.subscribeOperation(operation, 'deletion')[0];
-    } catch {
-      this.delQuery = this.delRespMapper = undefined;
+      const converted = queryMapper.subscribeOperation(operation, 'deletion');
+
+      if (converted.length === 0) {
+        throw new Error('No viable conversions found for this schema');
+      }
+
+      [ this.delQuery, this.delRespMapper ] = converted[0];
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to convert SPARQL query to deletion subscription stream: ${message}`);
     }
 
     // Map initial query if possible
@@ -74,16 +89,16 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     this.decoder = new TextDecoder('utf-8');
 
     // Start initial query
+    this.startSource();
     this.query(this.initQuery).catch((err) => {
       this.handleError(err);
     });
 
     // Start deletion stream
-    if (this.delQuery && this.delRespMapper) {
-      this.subscribe(this.delQuery, this.delRespMapper, false).catch((err) => {
-        this.handleError(err);
-      });
-    }
+    this.startSource();
+    this.subscribe(this.delQuery, this.delRespMapper, false).catch((err) => {
+      this.handleError(err);
+    });
   }
 
   public override read(): RDF.Bindings | null {
@@ -97,7 +112,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     return bindings;
   }
 
-  private async subscribe(query: string, resMapper: ResponseMapper, isAddition: boolean): Promise<void> {
+  private async subscribe(query: string, resMapper: ResponseMapper, isAdditionValue: boolean): Promise<void> {
     const body = {
       '@context': this.queryContext,
       query,
@@ -134,7 +149,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
         const { value, done } = await reader.read();
 
         if (done) {
-          this.close();
+          this.stopSource();
           return;
         }
 
@@ -170,9 +185,8 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
               this.bindingsFactory,
             );
 
-            bindings.map(b => b.setContextEntry(KeysBindings.isAddition, isAddition));
             for (const b of bindings) {
-              this.buffer.push(b);
+              this.buffer.push(b.setContextEntry(KeysBindings.isAddition, isAdditionValue));
             }
 
             if (bindings.length > 0) {
@@ -190,11 +204,13 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   private async query(query?: string): Promise<void> {
     // Start additions subscriptions stream if initial query is done
     if (!query) {
-      if (this.addQuery && this.addRespMapper) {
-        this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
-          this.handleError(err);
-        });
-      }
+      // Start the subscription source
+      this.startSource();
+      this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
+        this.handleError(err);
+      });
+      // Stop the init query source
+      this.stopSource();
       return;
     }
 
@@ -217,15 +233,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     });
 
     if (!response.ok) {
-      // Try to read the body for extra error info
-      let errorBody: any;
-      try {
-        errorBody = await response.text();
-      } catch {
-        errorBody = '<failed to read body>';
-      }
-
-      throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorBody}`);
+      throw new Error(`Unable to execute initial query: (${response.status}) ${response.statusText}`);
     }
 
     // Parse response and map to bindings
@@ -237,7 +245,6 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       this.bindingsFactory,
     );
 
-    bindings.map(b => b.setContextEntry(KeysBindings.isAddition, true));
     for (const b of bindings) {
       this.buffer.push(b);
     }
@@ -251,11 +258,13 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
     // If no pagination, start the addition stream
     if (!paginations || paginations.length === 0) {
-      if (this.addQuery && this.addRespMapper) {
-        this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
-          this.handleError(err);
-        });
-      }
+      // Start the subscription source
+      this.startSource();
+      this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
+        this.handleError(err);
+      });
+      // Stop the init query source
+      this.stopSource();
       return;
     }
 
@@ -271,6 +280,17 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     this.query(nextQuery).catch((err) => {
       this.handleError(err);
     });
+  }
+
+  private startSource(): void {
+    this.activeSources += 1;
+  }
+
+  private stopSource(): void {
+    this.activeSources -= 1;
+    if (this.activeSources === 0) {
+      this.close();
+    }
   }
 
   private handleError(error: Error): void {

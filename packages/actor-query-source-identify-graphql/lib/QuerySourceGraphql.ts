@@ -95,21 +95,8 @@ export class QuerySourceGraphql implements IQuerySource {
     context: IActionContext,
   ): BindingsStream {
     const variables = Util.inScopeVariables(operation);
-    const iterator = this.queryConversion(operation, variables, context);
-    iterator.setProperty('metadata', {
-      state: new MetadataValidationState(),
-      cardinality: { type: 'exact', value: 1 },
-      variables: variables.map(variable => ({ variable, canBeUndef: false })),
-    });
-    return iterator;
-  }
 
-  private queryConversion(
-    operation: Algebra.Operation,
-    variables: RDF.Variable[],
-    context: IActionContext,
-  ): AsyncIterator<RDF.Bindings> {
-    return new AsyncResourceIterator(
+    const iterator = new AsyncResourceIterator(
       this.source,
       context,
       this.queryContext,
@@ -121,7 +108,12 @@ export class QuerySourceGraphql implements IQuerySource {
       this.bindingsFactory,
     );
 
-    throw new Error(`Unable to convert SPARQL Query to Graphql Query for source ${this.source}`);
+    iterator.setProperty('metadata', {
+      state: new MetadataValidationState(),
+      cardinality: { type: 'estimate', value: 1 },
+      variables: variables.map(variable => ({ variable, canBeUndef: false })),
+    });
+    return iterator;
   }
 
   public queryQuads(
