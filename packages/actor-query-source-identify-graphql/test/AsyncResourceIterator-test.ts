@@ -6,16 +6,18 @@ import { QueryMapper } from '@comunica-graphql/sparql2graphql-converter';
 import { isAddition } from '@incremunica/user-tools';
 import { DataFactory } from 'rdf-data-factory';
 import { Factory, translate } from 'sparqlalgebrajs';
-import { AsyncResourceIterator } from '../lib/AsyncResourceIterator';
+import { AsyncResourceIterator, updateQueryCursor } from '../lib/AsyncResourceIterator';
 
 const mediatorMergeBindingsContext: any = {
   mediate: () => ({}),
 };
 
 function createInteractiveGraphqlService(
-  additionField?: string,
-  deletionField?: string,
+  additionField: string,
+  deletionField: string,
   queryResponses?: any[],
+  failAddition = false,
+  failDeletion = false,
 ) {
   const encoder = new TextEncoder();
 
@@ -38,8 +40,8 @@ function createInteractiveGraphqlService(
         const query = body.query ?? '';
 
         // Handle addition subscription
-        if (query.includes(additionField ?? '')) {
-          if (!additionField) {
+        if (query.includes(additionField)) {
+          if (failAddition) {
             return new Response('Addition subscription failed', { status: 400 });
           }
 
@@ -54,8 +56,8 @@ function createInteractiveGraphqlService(
         }
 
         // Handle deletion subscription
-        if (query.includes(deletionField ?? '')) {
-          if (!deletionField) {
+        if (query.includes(deletionField)) {
+          if (failDeletion) {
             return new Response(null, {
               status: 200,
               headers: { 'Content-Type': 'text/event-stream' },
@@ -79,6 +81,9 @@ function createInteractiveGraphqlService(
           }
 
           queryResponseIndex += 1;
+          if (!queryResponses[queryResponseIndex]) {
+            return new Response('Init query failed', { status: 400 });
+          }
           return new Response(JSON.stringify(queryResponses[queryResponseIndex]), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
@@ -279,14 +284,19 @@ describe('AsyncResourceIterator', () => {
               {
                 id: 'http://example.org/alice',
                 ex_name: 'Alice',
+                ex_address: { id: 'kortrijk', ex_zip: '8500' },
               },
             ],
           },
           extensions: {
             pagination: [
               {
-                path: '/persons',
+                path: '/persons/ex_name',
                 next: 'cursor1',
+              },
+              {
+                path: '/persons',
+                next: 'cursor2',
               },
             ],
           },
@@ -297,8 +307,9 @@ describe('AsyncResourceIterator', () => {
           data: {
             persons: [
               {
-                id: 'http://example.org/bob',
-                ex_name: 'Bob',
+                id: 'http://example.org/alice',
+                ex_name: 'Alice Doe',
+                ex_address: { id: 'gent', ex_zip: '9000' },
               },
             ],
           },
@@ -317,8 +328,9 @@ describe('AsyncResourceIterator', () => {
           data: {
             persons: [
               {
-                id: 'http://example.org/carol',
-                ex_name: 'Carol',
+                id: 'http://example.org/bob',
+                ex_name: 'Bob',
+                ex_address: { id: 'kortrijk', ex_zip: '8500' },
               },
             ],
           },
@@ -328,14 +340,18 @@ describe('AsyncResourceIterator', () => {
 
     const op = translate(`
       PREFIX ex: <http://example.org/>
-      SELECT ?person ?name WHERE { ?person ex:name ?name }
+      SELECT ?person ?name ?zip 
+      WHERE {
+        ?person ex:name ?name ;
+          ex:address ?add .
+        ?add ex:zip ?zip .
+      }
     `);
 
     const schema_context = { ex: 'http://example.org/' };
-
     const schema_string = `
       type Query {
-        persons(cursor: String): [ex_Person!]!
+        persons: [ex_Person!]!
       }
 
       type Subscription {
@@ -346,10 +362,16 @@ describe('AsyncResourceIterator', () => {
       type ex_Person {
         id: ID!
         ex_name: String!
+        ex_address: ex_Address!
+      }
+
+      type ex_Address {
+        id: ID!
+        ex_zip: String!
       }
     `;
 
-    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const variables = [ DF.variable('person'), DF.variable('name'), DF.variable('zip') ];
     const queryMapper = new QueryMapper(schema_string, schema_context);
 
     const iterator = new AsyncResourceIterator(
@@ -375,13 +397,13 @@ describe('AsyncResourceIterator', () => {
     expect(bindings).not.toBeNull();
     expect(isAddition(bindings!)).toBe(true);
 
-    // Bob (page 2)
+    // Alice Doe (page 2)
     await waitForReadable(iterator);
     bindings = iterator.read();
     expect(bindings).not.toBeNull();
     expect(isAddition(bindings!)).toBe(true);
 
-    // Carol (page 3)
+    // Bob (page 3)
     await waitForReadable(iterator);
     bindings = iterator.read();
     expect(bindings).not.toBeNull();
@@ -393,6 +415,7 @@ describe('AsyncResourceIterator', () => {
         onPersonAdded: {
           id: 'http://example.org/dylan',
           ex_name: 'Dylan',
+          ex_address: { id: 'kortrijk', ex_zip: '8500' },
         },
       },
     });
@@ -540,10 +563,170 @@ describe('AsyncResourceIterator', () => {
     });
   });
 
+  it('should throw if addition subscription stream fails after init query', async() => {
+    const svc = createInteractiveGraphqlService(
+      'onPersonAdded',
+      'onPersonDeleted',
+      [
+        {
+          data: {
+            persons: [
+              {
+                id: 'http://example.org/alice',
+                ex_name: 'Alice',
+              },
+              {
+                id: 'http://example.org/bob',
+                ex_name: 'Bob',
+              },
+            ],
+          },
+        },
+      ],
+      true,
+      false,
+    );
+
+    const op = translate(`
+      PREFIX ex: <http://example.org/>
+      SELECT ?person ?name WHERE { ?person ex:name ?name }
+    `);
+
+    const schema_context = { ex: 'http://example.org/' };
+    const schema_string = `
+      type Query {
+        persons: [ex_Person!]!
+      }
+
+      type Subscription {
+        onPersonAdded: ex_Person!
+        onPersonDeleted: ex_Person!
+      }
+
+      type ex_Person {
+        id: ID!
+        ex_name: String!
+      }
+    `;
+
+    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const queryMapper = new QueryMapper(schema_string, schema_context);
+
+    const iterator = new AsyncResourceIterator(
+      'http://example.org/test',
+      context,
+      schema_context,
+      queryMapper,
+      op,
+      <MediatorHttp><unknown>svc.mediator,
+      variables,
+      DF,
+      BF,
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      iterator.on('error', (err) => {
+        try {
+          expect(err.message).toMatch(/Unable to start subscription stream/u);
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+  });
+
+  it('should throw when paginated request fails', async() => {
+    const svc = createInteractiveGraphqlService(
+      'onPersonAdded',
+      'onPersonDeleted',
+      [
+        // Page 1
+        {
+          data: {
+            persons: [
+              {
+                id: 'http://example.org/alice',
+                ex_name: 'Alice',
+              },
+            ],
+          },
+          extensions: {
+            pagination: [
+              {
+                path: '/persons',
+                next: 'cursor1',
+              },
+              {
+                path: '/persons/ex_name',
+                next: 'cursor2',
+              },
+            ],
+          },
+        },
+
+        // Page 2 (error)
+        undefined,
+      ],
+    );
+
+    const op = translate(`
+      PREFIX ex: <http://example.org/>
+      SELECT ?person ?name WHERE { ?person ex:name ?name }
+    `);
+
+    const schema_context = { ex: 'http://example.org/' };
+
+    const schema_string = `
+      type Query {
+        persons(cursor: String): [ex_Person!]!
+      }
+
+      type Subscription {
+        onPersonAdded: ex_Person!
+        onPersonDeleted: ex_Person!
+      }
+
+      type ex_Person {
+        id: ID!
+        ex_name: String!
+      }
+    `;
+
+    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const queryMapper = new QueryMapper(schema_string, schema_context);
+
+    const iterator = new AsyncResourceIterator(
+      'http://example.org/test',
+      context,
+      schema_context,
+      queryMapper,
+      op,
+      <MediatorHttp><unknown>svc.mediator,
+      variables,
+      DF,
+      BF,
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      iterator.on('error', (err) => {
+        try {
+          expect(err.message).toMatch(/Unable to execute initial query/u);
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+  });
+
   it('should throw if subscription is unreadable', async() => {
     const svc = createInteractiveGraphqlService(
       'onPersonAdded',
-      undefined,
+      'onPersonDeleted',
+      [],
+      false,
+      true,
     );
 
     const op = translate(`
@@ -593,8 +776,11 @@ describe('AsyncResourceIterator', () => {
 
   it('should throw if subscription fails to start', async() => {
     const svc = createInteractiveGraphqlService(
-      undefined,
+      'onPersonAdded',
       'onPersonDeleted',
+      undefined,
+      true,
+      false,
     );
 
     const op = translate(`
@@ -692,6 +878,65 @@ describe('AsyncResourceIterator', () => {
           reject(e);
         }
       });
+    });
+  });
+
+  describe('updateQueryCursor', () => {
+    it('injects cursor at root field when no args exist', () => {
+      const query = `query { users { id } }`;
+      const result = updateQueryCursor(query, '/users', 'abc');
+      expect(result).toContain('users(cursor: "abc")');
+    });
+
+    it('append cursor at root field when args already exist', () => {
+      const query = 'query { users(limit: 10) { id } }';
+      const result = updateQueryCursor(query, '/users', 'abc');
+      expect(result).toContain('users(limit: 10, cursor: "abc")');
+    });
+
+    it('replaces existing cursor argument at root', () => {
+      const query = `query { users(limit: 10, cursor: "old") { id } }`;
+      const result = updateQueryCursor(query, '/users', 'new');
+      expect(result).toContain('users(limit: 10, cursor: "new")');
+      expect(result).not.toContain('cursor: "old"');
+    });
+
+    it('injects cursor into nested field without args', () => {
+      const query = 'query { users { posts { id } } }';
+      const result = updateQueryCursor(query, '/users/posts', 'abc');
+      expect(result).toContain('posts(cursor: "abc")');
+    });
+
+    it('injects cursor into nested field with existing args', () => {
+      const query = 'query { users { posts(limit: 5) { id } } }';
+      const result = updateQueryCursor(query, '/users/posts', 'abc');
+      expect(result).toContain('posts(limit: 5, cursor: "abc")');
+    });
+
+    it('replaces existing cursor in nested field', () => {
+      const query = `query { users { posts(limit: 5, cursor: "old") { id } } }`;
+      const result = updateQueryCursor(query, '/users/posts', 'new');
+      expect(result).toContain('posts(limit: 5, cursor: "new")');
+      expect(result).not.toContain('cursor: "old"');
+    });
+
+    it('does not modify inside strings', () => {
+      const query = `query { users { leaf @filter(if: "it=='posts { id }'") posts { id } } }`;
+      const result = updateQueryCursor(query, '/users/posts', 'abc');
+      expect(result).toBe(`query { users { leaf @filter(if: "it=='posts { id }'") posts(cursor: "abc") { id } } }`);
+    });
+
+    it('handles parantheses in arguments', () => {
+      const query = `query { users { posts(arg: "()") { id } } }`;
+      const result = updateQueryCursor(query, '/users/posts', 'new');
+      expect(result).toContain('posts(arg: "()", cursor: "new")');
+    });
+
+    it('throws error if path does not exist', () => {
+      const query = 'query { users { id } }';
+
+      expect(() =>
+        updateQueryCursor(query, '/fake', 'abc')).toThrow('Unable to update query with cursor abc at path /fake');
     });
   });
 });

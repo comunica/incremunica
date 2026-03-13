@@ -59,8 +59,9 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
       [ this.addQuery, this.addRespMapper ] = converted[0];
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new Error(`Failed to convert SPARQL query to addition subscription stream: ${message}`);
+      if (err instanceof Error) {
+        throw new TypeError(`Failed to convert SPARQL query to addition subscription stream: ${err.message}`);
+      }
     }
 
     // Map deletion subscription
@@ -73,8 +74,9 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 
       [ this.delQuery, this.delRespMapper ] = converted[0];
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new Error(`Failed to convert SPARQL query to deletion subscription stream: ${message}`);
+      if (err instanceof Error) {
+        throw new TypeError(`Failed to convert SPARQL query to deletion subscription stream: ${err.message}`);
+      }
     }
 
     // Map initial query if possible
@@ -299,8 +301,10 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   }
 }
 
-function updateQueryCursor(query: string, path?: string, newCursor = ''): string {
-  const pathParts = path ? path.replace(/^\/+/u, '').split('/') : [];
+export function updateQueryCursor(query: string, path: string, newCursor: string): string {
+  // Remove query declaration
+  query = query.trim().slice('query {'.length, query.length - 1).trim();
+  const pathParts = path.replace(/^\/+/u, '').split('/');
 
   function insertCursorAtField(source: string, parts: string[], depth = 0): string {
     const field = parts[0];
@@ -310,69 +314,11 @@ function updateQueryCursor(query: string, path?: string, newCursor = ''): string
     while (index < source.length) {
       const char = source[index];
 
-      // Handle string quotes properly (avoid modifying inside strings)
+      // Avoid modifying inside strings
       if (char === '"') {
         inString = !inString;
         index++;
         continue;
-      }
-
-      // Root-level query injection
-      if (parts.length === 0 && depth === 0) {
-        // Find the first field in the query body
-        const fieldMatch = /\b([_A-Za-z][_0-9A-Za-z]*)\b\s*(\(|\{)/u.exec(source);
-        if (!fieldMatch) {
-          throw new Error('Unable to locate root field in query.');
-        }
-
-        const fieldName = fieldMatch[1];
-        const matchStart = fieldMatch.index;
-        const matchEnd = matchStart + fieldName.length;
-        let i = matchEnd;
-
-        // Skip whitespace
-        while (/\s/u.test(source[i])) {
-          i++;
-        }
-
-        // Check for existing arguments
-        if (source[i] === '(') {
-          let parenCount = 1;
-          const argsStart = i;
-          i++;
-
-          while (i < source.length && parenCount > 0) {
-            if (source[i] === '(') {
-              parenCount++;
-            } else if (source[i] === ')') {
-              parenCount--;
-            }
-            i++;
-          }
-
-          const argsEnd = i;
-          const argsStr = source
-            .slice(argsStart + 1, argsEnd - 1)
-            .split(',')
-            .map(arg => arg.trim())
-            .filter(arg => arg && !arg.startsWith('cursor:'));
-
-          argsStr.push(`cursor: "${newCursor}"`);
-          const updatedField = `${fieldName}(${argsStr.join(', ')})`;
-
-          return (
-            source.slice(0, matchStart) +
-            updatedField +
-            source.slice(argsEnd)
-          );
-        }
-        // No args → inject a new one
-        const updatedField = `${fieldName}(cursor: "${newCursor}")`;
-        return (
-          source.slice(0, matchStart) +
-            updatedField +
-            source.slice(matchEnd)
-        );
       }
 
       // Match target field at current depth
@@ -421,7 +367,7 @@ function updateQueryCursor(query: string, path?: string, newCursor = ''): string
           let updatedField = '';
 
           if (argsStart === -1) {
-            updatedField = `${field}(cursor: "${newCursor}")`;
+            updatedField = `${field}(cursor: "${newCursor}") `;
           } else {
             const argsStr = source
               .slice(argsStart + 1, argsEnd - 1)
@@ -463,5 +409,5 @@ function updateQueryCursor(query: string, path?: string, newCursor = ''): string
     throw new Error(`Unable to update query with cursor ${newCursor} at path ${path}`);
   }
 
-  return insertCursorAtField(query, pathParts);
+  return `query { ${insertCursorAtField(query, pathParts)} }`;
 }
