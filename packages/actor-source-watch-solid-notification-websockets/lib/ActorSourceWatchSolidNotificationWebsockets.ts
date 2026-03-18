@@ -69,19 +69,6 @@ export class ActorSourceWatchSolidNotificationWebsockets extends ActorSourceWatc
       }
       socket = new WebSocket(sideData.notificationChannel);
       socket.onmessage = (message) => {
-        // TODO [2025-09-01]: For now ignoring the Buffer options => tests?
-        // let data: string | Buffer | ArrayBuffer | Buffer[] = message.data;
-        // if (Array.isArray(data)) {
-        // data = Buffer.concat(data);
-        // }
-        // if (data instanceof Buffer) {
-        // data = data.toString();
-        // }
-        // if (data instanceof ArrayBuffer) {
-        // const decoder = new TextDecoder('utf-8');
-        // data = decoder.decode(data);
-        // }
-
         const messageData = JSON.parse(<string>message.data);
         if (messageData.type === 'Delete') {
           events.emit('delete');
