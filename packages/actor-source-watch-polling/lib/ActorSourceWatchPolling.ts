@@ -13,6 +13,10 @@ import {
 import { KeysSourceWatch } from '@incremunica/context-entries';
 import type { ISourceWatchEventEmitter } from '@incremunica/types';
 
+function shouldEmitDeleteForStatus(status: number): boolean {
+  return status === 401 || status === 403 || status === 404 || status === 410 || status === 451;
+}
+
 /**
  * An incremunica Polling Source Watch Actor.
  */
@@ -47,7 +51,7 @@ export class ActorSourceWatchPolling extends ActorSourceWatch {
 
     let etag = action.metadata.etag;
     const checkForChanges = (): void => {
-      // TODO [2025-08-01]: what if the source doesn't support HEAD requests, if it's a SPARQL endpoint for example?
+      // TODO [2026-10-01]: what if the source doesn't support HEAD requests, if it's a SPARQL endpoint for example?
       this.mediatorHttp.mediate(
         {
           context: action.context,
@@ -61,16 +65,18 @@ export class ActorSourceWatchPolling extends ActorSourceWatch {
           pollingStartTime = Date.now() + (pollingPeriod - Number.parseInt(action.metadata.age, 10)) * 1000;
         }
 
-        // TODO [2025-08-01]: have more specific error handling for example 304: Not Modified should not emit 'delete'
         if (!responseHead.ok) {
-          events.emit('delete');
+          if (shouldEmitDeleteForStatus(responseHead.status)) {
+            events.emit('delete');
+          }
+          return;
         }
         if (responseHead.headers.get('etag') !== etag) {
           events.emit('update');
           etag = responseHead.headers.get('etag');
         }
       }).catch(() => {
-        events.emit('delete');
+        // Ignore transient transport errors and retry in the next cycle.
       });
     };
 

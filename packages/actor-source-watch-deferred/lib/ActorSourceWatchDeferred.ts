@@ -13,6 +13,10 @@ import {
 import { KeysSourceWatch } from '@incremunica/context-entries';
 import type { ISourceWatchEventEmitter } from '@incremunica/types';
 
+function shouldEmitDeleteForStatus(status: number): boolean {
+  return status === 401 || status === 403 || status === 404 || status === 410 || status === 451;
+}
+
 /**
  * An incremunica Deferred Source Watch Actor.
  */
@@ -61,16 +65,18 @@ export class ActorSourceWatchDeferred extends ActorSourceWatch {
           },
         },
       ).then((responseHead) => {
-        // TODO [2025-08-01]: have more specific error handling for example 304: Not Modified should not emit 'delete'
         if (!responseHead.ok) {
-          outputEvents.emit('delete');
+          if (shouldEmitDeleteForStatus(responseHead.status)) {
+            outputEvents.emit('delete');
+          }
+          return;
         }
         if (responseHead.headers.get('etag') !== etag) {
           outputEvents.emit('update');
           etag = responseHead.headers.get('etag');
         }
       }).catch(() => {
-        outputEvents.emit('delete');
+        // Ignore transient transport errors and retry on next trigger.
       });
     };
 

@@ -45,6 +45,7 @@ describe('ActorSourceWatchPolling', () => {
       age: string | undefined;
       'cache-control': string | undefined;
       etag: number;
+      status?: number;
     };
 
     beforeEach(() => {
@@ -53,11 +54,15 @@ describe('ActorSourceWatchPolling', () => {
         age: undefined,
         'cache-control': undefined,
         etag: 0,
+        status: 200,
       };
 
       mediatorHttp = <any>{
         mediate: jest.fn(async(_action: IActionHttp) => {
+          const status = headersObject.status ?? 200;
           return {
+            ok: status >= 200 && status < 300,
+            status,
             headers: {
               age: headersObject.age,
               'cache-control': headersObject['cache-control'],
@@ -120,21 +125,23 @@ describe('ActorSourceWatchPolling', () => {
       });
     });
 
-    it('should emit "delete" if HTTP mediator errors', async() => {
+    it('should not emit "delete" if HTTP mediator errors', async() => {
       mediatorHttp.mediate = async(): Promise<IActorHttpOutput> => {
         throw new Error('Test error in HTTP mediator');
       };
       headersObject.etag = 0;
 
       const result = await actor.run(action);
+      const deleteListener = jest.fn();
+      result.events.on('delete', deleteListener);
       result.start();
       expect(setInterval).toHaveBeenCalledTimes(0);
       expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 1000);
-      headersObject.etag = 1;
-      await expect(new Promise<void>(resolve => result.events.once('delete', () => {
-        resolve();
-      }))).resolves.toBeUndefined();
+      const timeoutCallback = (<jest.Mock><any>setTimeout).mock.calls[0][0];
+      timeoutCallback();
+      await new Promise(resolve => setImmediate(resolve));
+      expect(deleteListener).toHaveBeenCalledTimes(0);
 
       expect(setInterval).toHaveBeenCalledTimes(1);
       expect(setInterval).toHaveBeenNthCalledWith(1, expect.any(Function), 1000);
@@ -142,6 +149,39 @@ describe('ActorSourceWatchPolling', () => {
       result.stop();
       expect(clearTimeout).toHaveBeenCalledTimes(1);
       expect(clearInterval).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([ 304, 500 ])('should not emit "delete" for HTTP %s', async(status) => {
+      headersObject.status = status;
+
+      const result = await actor.run(action);
+      const deleteListener = jest.fn();
+      result.events.on('delete', deleteListener);
+      result.start();
+
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      const timeoutCallback = (<jest.Mock><any>setTimeout).mock.calls[0][0];
+      timeoutCallback();
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(deleteListener).toHaveBeenCalledTimes(0);
+      result.stop();
+    });
+
+    it.each([ 401, 403, 404, 410, 451 ])('should emit "delete" for HTTP %s', async(status) => {
+      headersObject.status = status;
+
+      const result = await actor.run(action);
+      result.start();
+
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      const timeoutCallback = (<jest.Mock><any>setTimeout).mock.calls[0][0];
+      const deletePromise = new Promise<void>(resolve => result.events.once('delete', () => {
+        resolve();
+      }));
+      timeoutCallback();
+      await expect(deletePromise).resolves.toBeUndefined();
+      result.stop();
     });
 
     it('should get an update if the etag changes', async() => {

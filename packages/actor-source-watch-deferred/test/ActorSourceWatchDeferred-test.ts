@@ -120,8 +120,8 @@ describe('ActorSourceWatchDeferred', () => {
         expect(listener).toHaveBeenCalledTimes(0);
       });
 
-      it('should emit delete if resource doesn\'t return a 200 code', async() => {
-        jest.spyOn(mediatorHttp, 'mediate').mockResolvedValue({ ok: false, headers: { get: () => '0' }});
+      it('should not emit delete if resource fetch fails', async() => {
+        jest.spyOn(mediatorHttp, 'mediate').mockRejectedValue(new Error('This is an error.'));
         const result = await actor.run(action);
         const listener = jest.fn();
         result.events.on('delete', listener);
@@ -130,11 +130,24 @@ describe('ActorSourceWatchDeferred', () => {
         expect(mediatorHttp.mediate).toHaveBeenCalledTimes(1);
         // Make sure the promise the mediator promise is resolved
         await new Promise(resolve => setImmediate(resolve));
-        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).toHaveBeenCalledTimes(0);
       });
 
-      it('should emit delete if resource fetch fails', async() => {
-        jest.spyOn(mediatorHttp, 'mediate').mockRejectedValue(new Error('This is an error.'));
+      it.each([ 304, 500 ])('should not emit delete for HTTP %s', async(status) => {
+        jest.spyOn(mediatorHttp, 'mediate').mockResolvedValue({ ok: false, status, headers: { get: () => '0' }});
+        const result = await actor.run(action);
+        const listener = jest.fn();
+        result.events.on('delete', listener);
+        result.start();
+        deferredEvaluationTrigger.emit('update');
+        expect(mediatorHttp.mediate).toHaveBeenCalledTimes(1);
+        // Make sure the promise the mediator promise is resolved
+        await new Promise(resolve => setImmediate(resolve));
+        expect(listener).toHaveBeenCalledTimes(0);
+      });
+
+      it.each([ 401, 403, 404, 410, 451 ])('should emit delete for HTTP %s', async(status) => {
+        jest.spyOn(mediatorHttp, 'mediate').mockResolvedValue({ ok: false, status, headers: { get: () => '0' }});
         const result = await actor.run(action);
         const listener = jest.fn();
         result.events.on('delete', listener);
