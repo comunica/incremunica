@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-query-source-identify-graphql",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "A graphql query-source-identify actor",
   "lsd:module": true,
   "license": "MIT",
@@ -47,7 +47,7 @@
     "@comunica/types": "^4.2.0",
     "@comunica/utils-bindings-factory": "^4.2.0",
     "@comunica/utils-metadata": "^4.2.0",
-    "@incremunica/context-entries": "^2.3.0",
+    "@incremunica/context-entries": "^2.3.2",
     "@incremunica/data-structures": "^2.2.2",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",
