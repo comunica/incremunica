@@ -36,6 +36,7 @@ export class GroupIterator extends AsyncIterator<Bindings> {
   private started = false;
   private emptyResult: Bindings | undefined = undefined;
   private emptyResultEmitted = false;
+  private emptyResultInitializationStarted = false;
   private readonly bindingsFactory: BindingsFactory;
   private readCount = 0;
 
@@ -64,7 +65,7 @@ export class GroupIterator extends AsyncIterator<Bindings> {
 
     this.source.on('readable', this._readBindings.bind(this));
     this.source.on('error', (error: Error) => this.destroy(error));
-    // TODO [2025-09-01]: if source is ended we should end this iterator as well
+    // TODO [2026-10-01]: if source is ended we should end this iterator as well
 
     this.on('end', () => {
       this._cleanup();
@@ -107,6 +108,7 @@ export class GroupIterator extends AsyncIterator<Bindings> {
   public override read(): Bindings | null {
     if (!this.started) {
       this._readBindings();
+      this.initializeEmptyResult();
       this.readable = false;
       this.started = true;
       return null;
@@ -121,7 +123,6 @@ export class GroupIterator extends AsyncIterator<Bindings> {
       } else if (this.emptyResultEmitted) {
         const result = this.emptyResult.setContextEntry(KeysBindings.isAddition, false);
         this.emptyResultEmitted = false;
-        this.emptyResult = undefined;
         return result;
       }
     }
@@ -130,7 +131,7 @@ export class GroupIterator extends AsyncIterator<Bindings> {
       this.nextBindings = null;
       return bindings;
     }
-    // TODO [2025-09-01]: maybe make sure this is done in round robin fashion
+    // TODO [2026-10-01]: maybe make sure this is done in round robin fashion
     for (const group of this.groups.values()) {
       if (group.groupBuffer) {
         continue;
@@ -183,26 +184,33 @@ export class GroupIterator extends AsyncIterator<Bindings> {
     // Case: No Input
     // Some aggregators still define an output on the empty input
     // Result is a single Bindings
-    // TODO [2025-09-01]: only do tis once when the iterator is started and keep the result for the future
     if (this.groupVariables.size === 0 && this.groups.size === 0) {
-      const single: [RDF.Variable, RDF.Term][] = [];
-      Promise.all(this.pattern.aggregates.map(async(aggregate) => {
-        const key = aggregate.variable;
-        const aggregator = await this.mediatorBindingsAggregatorFactory
-          .mediate({ expr: aggregate, context: this.context });
-        const value = aggregator.result();
-        if (value !== undefined && value !== null) {
-          single.push([ key, value ]);
-        }
-      })).then(() => {
-        this.emptyResult = this.bindingsFactory.bindings(single);
-        this.readable = true;
-      }).catch((e) => {
-        this.destroy(e);
-      });
+      this.initializeEmptyResult();
     }
     this.readable = false;
     return null;
+  }
+
+  private initializeEmptyResult(): void {
+    if (this.groupVariables.size > 0 || this.emptyResultInitializationStarted) {
+      return;
+    }
+    this.emptyResultInitializationStarted = true;
+    const single: [RDF.Variable, RDF.Term][] = [];
+    Promise.all(this.pattern.aggregates.map(async(aggregate) => {
+      const key = aggregate.variable;
+      const aggregator = await this.mediatorBindingsAggregatorFactory
+        .mediate({ expr: aggregate, context: this.context });
+      const value = aggregator.result();
+      if (value !== undefined && value !== null) {
+        single.push([ key, value ]);
+      }
+    })).then(() => {
+      this.emptyResult = this.bindingsFactory.bindings(single);
+      this.readable = true;
+    }).catch((e) => {
+      this.destroy(e);
+    });
   }
 
   public async putBindings(bindings: Bindings): Promise<void> {

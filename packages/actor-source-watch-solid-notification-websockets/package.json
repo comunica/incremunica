@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/actor-source-watch-solid-notification-websockets",
-  "version": "2.3.0",
+  "version": "2.3.2",
   "description": "An incremunica solid notification source watch actor",
   "lsd:module": true,
   "license": "MIT",

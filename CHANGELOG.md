@@ -1,6 +1,21 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.2"></a>
+## [v2.3.2](https://github.com/comunica/incremunica/compare/v2.3.1...v2.3.2) - 2026-03-18
+
+* [chore: extend todos](https://github.com/comunica/incremunica/commit/f9d3c67c17e3325bb8df26f4fa0fa98a78acbd0f)
+* [chore: add a function for initializeEmptyResult](https://github.com/comunica/incremunica/commit/6727360a369e836b1cfed5d5a378ff357224836b)
+* [fix: only emit delete for certain httpstatus codes](https://github.com/comunica/incremunica/commit/3fbe603ced192bed96bf8aa68c75d30cd5b7292e)
+* [chore: minor changes to graphql support](https://github.com/comunica/incremunica/commit/420952582e0e058ad97cb4b80f60a644068d37ea)
+* [Merge pull request #147 from ponachte/graphql-support](https://github.com/comunica/incremunica/commit/5124063150c49fb8fc671446dfc16cc575cd094e)
+* [add tests](https://github.com/comunica/incremunica/commit/3f51531e82ecd7294b79ffb93b27a18c1f24af69)
+* [add tests](https://github.com/comunica/incremunica/commit/f10146314d4fa3a13e2273a613ceedd7e294eff6)
+* [start deletion and init query at the same time](https://github.com/comunica/incremunica/commit/39f0fe8a62752f079113e4f560bb724fc581f4ca)
+* [add subscription bindings bugfix](https://github.com/comunica/incremunica/commit/381e4f6c90957545116b62f1e7c86cfb79b443cc)
+* [use sparql2graphql-converter package](https://github.com/comunica/incremunica/commit/f5c83c1e1ebeef90f32182756a6648c46f12a43c)
+* [Merge pull request #145 from comunica/next/minor](https://github.com/comunica/incremunica/commit/f3f0485056bcf75a86df9427caf4321a6596482a)
+
 <a name="v2.3.1"></a>
 ## [v2.3.1](https://github.com/comunica/incremunica/compare/v2.3.0...v2.3.1) - 2026-02-05
 

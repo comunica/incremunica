@@ -11,8 +11,8 @@ import type { TestResult, IActorTest } from '@comunica/core';
 import { failTest, passTestVoid } from '@comunica/core';
 import type { ComunicaDataFactory } from '@comunica/types';
 import { BindingsFactory } from '@comunica/utils-bindings-factory';
+import { KeysGraphQLSource } from '@incremunica/context-entries';
 import { QuerySourceGraphql } from './QuerySourceGraphql';
-import { KeysGraphQLSource } from './SchemaKeys';
 
 /**
  * An incremunica Graphql Query Source Identify Actor.
