@@ -1,10 +1,10 @@
 import { ActorQuerySourceIdentify } from '@comunica/bus-query-source-identify';
 import { KeysInitQuery } from '@comunica/context-entries';
 import { ActionContext, Bus } from '@comunica/core';
+import { KeysGraphQLSource } from '@incremunica/context-entries';
 import { DataFactory } from 'rdf-data-factory';
 import { ActorQuerySourceIdentifyGraphql } from '../lib';
 import { QuerySourceGraphql } from '../lib/QuerySourceGraphql';
-import { KeysGraphQLSource } from '../lib/SchemaKeys';
 
 const mediatorMergeBindingsContext: any = {
   mediate: () => ({}),
