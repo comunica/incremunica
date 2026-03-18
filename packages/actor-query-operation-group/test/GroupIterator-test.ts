@@ -1442,6 +1442,7 @@ describe('ActorQueryOperationGroup', () => {
         aggregates: [ aggregateOn('count', 'x', 'c') ],
         cardinality: 1,
       });
+      const mediateSpy = jest.spyOn((<any> actor).mediatorBindingsAggregatorFactory, 'mediate');
 
       const output = <any> await actor.run(op, undefined);
       iterator.readable = true;
@@ -1486,6 +1487,7 @@ describe('ActorQueryOperationGroup', () => {
           [ DF.variable('c'), int('0') ],
         ]),
       ]);
+      expect(mediateSpy).toHaveBeenCalledTimes(2);
     });
 
     it('should be able to sum', async() => {
