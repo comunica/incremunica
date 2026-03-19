@@ -8,6 +8,8 @@ import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
 import type { Algebra } from 'sparqlalgebrajs';
 
+type SourceType = 'addition' | 'deletion' | 'init';
+
 export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   protected readonly source: string;
   protected readonly mediatorHttp: MediatorHttp;
@@ -18,16 +20,19 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   private readonly bindingsFactory: BindingsFactory;
 
   private readonly queryContext: Record<string, string>;
-  protected addQuery: string;
-  protected addRespMapper: ResponseMapper;
-  protected delQuery: string;
-  protected delRespMapper: ResponseMapper;
-  protected initQuery: string | undefined;
-  protected initRespMapper: ResponseMapper | undefined;
+
+  protected addQuery?: string;
+  protected addRespMapper?: ResponseMapper;
+
+  protected delQuery?: string;
+  protected delRespMapper?: ResponseMapper;
+
+  protected initQuery?: string;
+  protected initRespMapper?: ResponseMapper;
 
   protected buffer: Queue<RDF.Bindings>;
   protected decoder: TextDecoder;
-  protected activeSources = 0;
+  protected activeSources: Set<SourceType> = new Set();
 
   public constructor(
     source: string,
@@ -41,6 +46,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     bindingsFactory: BindingsFactory,
   ) {
     super();
+
     this.source = source;
     this.mediatorHttp = mediatorHttp;
     this.context = context;
@@ -49,58 +55,47 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     this.bindingsFactory = bindingsFactory;
     this.queryContext = queryContext;
 
-    // Map addition subscription
+    // --- Try to create addition/deletion streams ---
     try {
       const converted = queryMapper.subscribeOperation(operation, 'addition');
-
-      if (converted.length === 0) {
-        throw new Error('No viable conversions found for this schema');
+      if (converted.length > 0) {
+        [ this.addQuery, this.addRespMapper ] = converted[0];
+        this.startSource('addition');
       }
-
-      [ this.addQuery, this.addRespMapper ] = converted[0];
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        throw new TypeError(`Failed to convert SPARQL query to addition subscription stream: ${err.message}`);
-      }
+    } catch {
+      // ignore
     }
 
-    // Map deletion subscription
     try {
       const converted = queryMapper.subscribeOperation(operation, 'deletion');
-
-      if (converted.length === 0) {
-        throw new Error('No viable conversions found for this schema');
+      if (converted.length > 0) {
+        [ this.delQuery, this.delRespMapper ] = converted[0];
+        this.startSource('deletion');
       }
-
-      [ this.delQuery, this.delRespMapper ] = converted[0];
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        throw new TypeError(`Failed to convert SPARQL query to deletion subscription stream: ${err.message}`);
-      }
+    } catch {
+      // ignore
     }
 
-    // Map initial query if possible
-    try {
-      [ this.initQuery, this.initRespMapper ] = queryMapper.queryOperation(operation)[0];
-    } catch {
-      this.initQuery = this.initRespMapper = undefined;
+    if (this.activeSources.size === 0) {
+      throw new TypeError(
+        'Failed to convert SPARQL query: neither addition nor deletion subscription streams could be created',
+      );
     }
 
     this.buffer = new Queue<RDF.Bindings>();
     this.readable = false;
     this.decoder = new TextDecoder('utf-8');
 
-    // Start initial query
-    this.startSource();
-    this.query(this.initQuery).catch((err) => {
-      this.handleError(err);
-    });
-
-    // Start deletion stream
-    this.startSource();
-    this.subscribe(this.delQuery, this.delRespMapper, false).catch((err) => {
-      this.handleError(err);
-    });
+    // --- Initial query (optional) ---
+    const converted = queryMapper.queryOperation(operation);
+    if (converted.length > 0) {
+      [ this.initQuery, this.initRespMapper ] = converted[0];
+      this.startSource('init');
+      this.query(this.initQuery).catch(err => this.handleError(err));
+    } else {
+      // Start subscription if no init query possible
+      this.startSubscription();
+    }
   }
 
   public override read(): RDF.Bindings | null {
@@ -114,7 +109,21 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     return bindings;
   }
 
-  private async subscribe(query: string, resMapper: ResponseMapper, isAdditionValue: boolean): Promise<void> {
+  // --- Centralized subscription starter ---
+  private startSubscription(): void {
+    if (this.addQuery && this.addRespMapper) {
+      this.subscribe(this.addQuery, this.addRespMapper, 'addition').catch(err => this.handleError(err));
+    }
+    if (this.delQuery && this.delRespMapper) {
+      this.subscribe(this.delQuery, this.delRespMapper, 'deletion').catch(err => this.handleError(err));
+    }
+  }
+
+  private async subscribe(
+    query: string,
+    resMapper: ResponseMapper,
+    type: 'addition' | 'deletion',
+  ): Promise<void> {
     const body = {
       '@context': this.queryContext,
       query,
@@ -151,7 +160,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
         const { value, done } = await reader.read();
 
         if (done) {
-          this.stopSource();
+          this.stopSource(type);
           return;
         }
 
@@ -174,49 +183,42 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
           }
 
           dataStr = dataStr.trim();
-          if (!dataStr) {
-            continue;
-          }
+          if (!dataStr) continue;
 
           if (eventType === 'next') {
             const json = JSON.parse(dataStr);
-            const bindings = resMapper.dataToBindings(
-              json.data,
-              this.variables,
-              this.dataFactory,
-              this.bindingsFactory,
-            );
 
-            for (const b of bindings) {
-              this.buffer.push(b.setContextEntry(KeysBindings.isAddition, isAdditionValue));
-            }
+            if (json.errors) {
+              this.handleError(
+                new Error(
+                  `Received error on ${type} stream: ${JSON.stringify(json, null, 2)}`,
+                ),
+              );
+            } else if (json.data) {
+              const bindings = resMapper.dataToBindings(
+                json.data,
+                this.variables,
+                this.dataFactory,
+                this.bindingsFactory,
+              );
 
-            if (bindings.length > 0) {
-              this.readable = true;
+              for (const b of bindings) {
+                this.buffer.push(b.setContextEntry(KeysBindings.isAddition, type === 'addition'));
+              }
+
+              if (bindings.length > 0) {
+                this.readable = true;
+              }
             }
           }
         }
       }
     };
-    handleSSE().catch((err) => {
-      this.handleError(err);
-    });
+
+    handleSSE().catch(err => this.handleError(err));
   }
 
-  private async query(query?: string): Promise<void> {
-    // Start additions subscriptions stream if initial query is done
-    if (!query) {
-      // Start the subscription source
-      this.startSource();
-      this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
-        this.handleError(err);
-      });
-      // Stop the init query source
-      this.stopSource();
-      return;
-    }
-
-    // Get query response
+  private async query(query: string): Promise<void> {
     const body = {
       '@context': this.queryContext,
       query,
@@ -238,8 +240,8 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       throw new Error(`Unable to execute initial query: (${response.status}) ${response.statusText}`);
     }
 
-    // Parse response and map to bindings
     const json = await response.json();
+
     const bindings = this.initRespMapper!.dataToBindings(
       json.data,
       this.variables,
@@ -255,42 +257,31 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       this.readable = true;
     }
 
-    // Handle pagination
     const paginations = json?.extensions?.pagination?.filter((p: any) => p?.next);
 
-    // If no pagination, start the addition stream
     if (!paginations || paginations.length === 0) {
-      // Start the subscription source
-      this.startSource();
-      this.subscribe(this.addQuery, this.addRespMapper, true).catch((err) => {
-        this.handleError(err);
-      });
-      // Stop the init query source
-      this.stopSource();
+      this.startSubscription();
+      this.stopSource('init');
       return;
     }
 
-    // Find the pagination with the deepest path
     const deepestPagination = paginations.reduce((deepest: any, current: any) => {
       const currentDepth = current.path.split('/').filter(Boolean).length;
       const deepestDepth = deepest.path.split('/').filter(Boolean).length;
       return currentDepth > deepestDepth ? current : deepest;
     });
 
-    // Update query cursor
     const nextQuery = updateQueryCursor(query, deepestPagination.path, deepestPagination.next);
-    this.query(nextQuery).catch((err) => {
-      this.handleError(err);
-    });
+    this.query(nextQuery).catch(err => this.handleError(err));
   }
 
-  private startSource(): void {
-    this.activeSources += 1;
+  private startSource(type: SourceType): void {
+    this.activeSources.add(type);
   }
 
-  private stopSource(): void {
-    this.activeSources -= 1;
-    if (this.activeSources === 0) {
+  private stopSource(type: SourceType): void {
+    this.activeSources.delete(type);
+    if (this.activeSources.size === 0) {
       this.close();
     }
   }
@@ -302,11 +293,10 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
 }
 
 export function updateQueryCursor(query: string, path: string, newCursor: string): string {
-  // Remove query declaration
   query = query.trim().slice('query {'.length, query.length - 1).trim();
   const pathParts = path.replace(/^\/+/u, '').split('/');
 
-  function insertCursorAtField(source: string, parts: string[], depth = 0): string {
+  function insertCursorAtField(source: string, parts: string[]): string {
     const field = parts[0];
     let index = 0;
     let inString = false;
@@ -314,55 +304,40 @@ export function updateQueryCursor(query: string, path: string, newCursor: string
     while (index < source.length) {
       const char = source[index];
 
-      // Avoid modifying inside strings
       if (char === '"') {
         inString = !inString;
         index++;
         continue;
       }
 
-      // Match target field at current depth
       if (!inString && field && new RegExp(`^\\b${field}\\b`, 'u').test(source.slice(index))) {
         const matchStart = index;
         const matchEnd = index + field.length;
 
-        // Find args and body
         let argsStart = -1;
         let argsEnd = -1;
         let bodyStart = -1;
 
         index = matchEnd;
 
-        while (/\s/u.test(source[index])) {
-          index++;
-        }
+        while (/\s/u.test(source[index])) index++;
 
-        // Handle arguments
         if (source[index] === '(') {
           argsStart = index;
           let parenCount = 1;
           index++;
           while (index < source.length && parenCount > 0) {
-            if (source[index] === '(') {
-              parenCount++;
-            } else if (source[index] === ')') {
-              parenCount--;
-            }
+            if (source[index] === '(') parenCount++;
+            else if (source[index] === ')') parenCount--;
             index++;
           }
           argsEnd = index;
         }
 
-        while (/\s/u.test(source[index])) {
-          index++;
-        }
+        while (/\s/u.test(source[index])) index++;
 
-        // Handle body
-        if (source[index] === '{') {
-          bodyStart = index;
-        }
+        if (source[index] === '{') bodyStart = index;
 
-        // Leaf field — apply cursor
         if (parts.length === 1) {
           let updatedField = '';
 
@@ -381,16 +356,12 @@ export function updateQueryCursor(query: string, path: string, newCursor: string
           return source.slice(0, matchStart) + updatedField + source.slice(index);
         }
 
-        // Recursive case
         if (bodyStart !== -1) {
           let braceCount = 1;
           let bodyEnd = bodyStart + 1;
           while (bodyEnd < source.length && braceCount > 0) {
-            if (source[bodyEnd] === '{') {
-              braceCount++;
-            } else if (source[bodyEnd] === '}') {
-              braceCount--;
-            }
+            if (source[bodyEnd] === '{') braceCount++;
+            else if (source[bodyEnd] === '}') braceCount--;
             bodyEnd++;
           }
 
@@ -398,7 +369,7 @@ export function updateQueryCursor(query: string, path: string, newCursor: string
           const body = source.slice(bodyStart + 1, bodyEnd - 1);
           const after = source.slice(bodyEnd - 1);
 
-          const newBody = insertCursorAtField(body, parts.slice(1), depth + 1);
+          const newBody = insertCursorAtField(body, parts.slice(1));
           return before + newBody + after;
         }
       }
