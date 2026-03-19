@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.3"></a>
+## [v2.3.3](https://github.com/comunica/incremunica/compare/v2.3.2...v2.3.3) - 2026-03-19
+
+* [Merge pull request #149 from ponachte/graphql-support](https://github.com/comunica/incremunica/commit/6f8b9ac030ec3b2e51ad5359ef456d08e7951558)
+* [eslint fix](https://github.com/comunica/incremunica/commit/8b6d1c7ee64a3906e8795b358a6fb994eb0f0036)
+* [allow single subscription stream](https://github.com/comunica/incremunica/commit/9a3fe21377a7802c6709e1b53ed574eebe59c447)
+* [Merge pull request #148 from comunica/next/minor](https://github.com/comunica/incremunica/commit/212d6af9ba5183ea85260f93b34d8059e005ca5b)
+
 <a name="v2.3.2"></a>
 ## [v2.3.2](https://github.com/comunica/incremunica/compare/v2.3.1...v2.3.2) - 2026-03-18
 
