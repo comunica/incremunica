@@ -467,7 +467,7 @@ describe('AsyncResourceIterator', () => {
     );
 
     // Wait until both subscription streams are started
-    while (svc.mediator.mediate.mock.calls.length < 1) {
+    while (svc.mediator.mediate.mock.calls.length === 0) {
       await new Promise(resolve => setTimeout(resolve, 0));
     }
 
@@ -525,7 +525,7 @@ describe('AsyncResourceIterator', () => {
     );
 
     // Wait until both subscription streams are started
-    while (svc.mediator.mediate.mock.calls.length < 1) {
+    while (svc.mediator.mediate.mock.calls.length === 0) {
       await new Promise(resolve => setTimeout(resolve, 0));
     }
 
@@ -543,8 +543,6 @@ describe('AsyncResourceIterator', () => {
     expect(bindings).not.toBeNull();
     expect(isAddition(bindings!)).toBe(true);
   });
-
-  
 
   it('should throw if no subscription type is defined', async() => {
     const svc = createInteractiveGraphqlService(
@@ -718,7 +716,7 @@ describe('AsyncResourceIterator', () => {
     const svc = createInteractiveGraphqlService(
       'onPersonAdded',
       'onPersonDeleted',
-      [ { data: { persons: [] } } ]
+      [{ data: { persons: []}}],
     );
 
     const op = translate(`
@@ -765,13 +763,13 @@ describe('AsyncResourceIterator', () => {
 
     svc.emitAddition({
       errors: [{
-        message: "Error message"
+        message: 'Error message',
       }],
     });
 
     svc.emitDeletion({
       errors: [{
-        message: "Error message"
+        message: 'Error message',
       }],
     });
 

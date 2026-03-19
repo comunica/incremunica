@@ -63,7 +63,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
         this.startSource('addition');
       }
     } catch {
-      // ignore
+      // Ignore
     }
 
     try {
@@ -73,7 +73,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
         this.startSource('deletion');
       }
     } catch {
-      // ignore
+      // Ignore
     }
 
     if (this.activeSources.size === 0) {
@@ -183,7 +183,9 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
           }
 
           dataStr = dataStr.trim();
-          if (!dataStr) continue;
+          if (!dataStr) {
+            continue;
+          }
 
           if (eventType === 'next') {
             const json = JSON.parse(dataStr);
@@ -320,23 +322,32 @@ export function updateQueryCursor(query: string, path: string, newCursor: string
 
         index = matchEnd;
 
-        while (/\s/u.test(source[index])) index++;
+        while (/\s/u.test(source[index])) {
+          index++;
+        }
 
         if (source[index] === '(') {
           argsStart = index;
           let parenCount = 1;
           index++;
           while (index < source.length && parenCount > 0) {
-            if (source[index] === '(') parenCount++;
-            else if (source[index] === ')') parenCount--;
+            if (source[index] === '(') {
+              parenCount++;
+            } else if (source[index] === ')') {
+              parenCount--;
+            }
             index++;
           }
           argsEnd = index;
         }
 
-        while (/\s/u.test(source[index])) index++;
+        while (/\s/u.test(source[index])) {
+          index++;
+        }
 
-        if (source[index] === '{') bodyStart = index;
+        if (source[index] === '{') {
+          bodyStart = index;
+        }
 
         if (parts.length === 1) {
           let updatedField = '';
@@ -360,8 +371,11 @@ export function updateQueryCursor(query: string, path: string, newCursor: string
           let braceCount = 1;
           let bodyEnd = bodyStart + 1;
           while (bodyEnd < source.length && braceCount > 0) {
-            if (source[bodyEnd] === '{') braceCount++;
-            else if (source[bodyEnd] === '}') braceCount--;
+            if (source[bodyEnd] === '{') {
+              braceCount++;
+            } else if (source[bodyEnd] === '}') {
+              braceCount--;
+            }
             bodyEnd++;
           }
 
