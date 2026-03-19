@@ -1,6 +1,6 @@
 {
   "name": "@incremunica/query-sparql-incremental",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "A SPARQL query engine for incremental querying over decentralized RDF knowledge graphs on the Web",
   "license": "MIT",
   "homepage": "https://comunica.github.io/incremunica/",
@@ -273,7 +273,7 @@
     "@incremunica/actor-query-operation-reduced-hash": "^2.3.2",
     "@incremunica/actor-query-operation-slice": "^2.3.2",
     "@incremunica/actor-query-operation-slice-ordered": "^2.3.2",
-    "@incremunica/actor-query-source-identify-graphql": "^2.3.2",
+    "@incremunica/actor-query-source-identify-graphql": "^2.3.3",
     "@incremunica/actor-query-source-identify-hypermedia-none": "^2.3.2",
     "@incremunica/actor-query-source-identify-stream": "^2.3.2",
     "@incremunica/actor-query-source-identify-streaming-rdfjs": "^2.3.2",

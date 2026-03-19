@@ -428,11 +428,10 @@ describe('AsyncResourceIterator', () => {
     svc.close();
   });
 
-  it('should throw if no valid addition subscription can be constructed', async() => {
+  it('deletion description should work if no addition description is present', async() => {
     const svc = createInteractiveGraphqlService(
       'onPersonAdded',
       'onPersonDeleted',
-      [],
     );
 
     const op = translate(`
@@ -455,7 +454,7 @@ describe('AsyncResourceIterator', () => {
     const variables = [ DF.variable('person'), DF.variable('name') ];
     const queryMapper = new QueryMapper(schema_string, schema_context);
 
-    expect(() => new AsyncResourceIterator(
+    const iterator = new AsyncResourceIterator(
       'http://example.org/test',
       context,
       schema_context,
@@ -465,10 +464,29 @@ describe('AsyncResourceIterator', () => {
       variables,
       DF,
       BF,
-    )).toThrow(/Failed to convert SPARQL query to addition subscription stream/u);
+    );
+
+    // Wait until both subscription streams are started
+    while (svc.mediator.mediate.mock.calls.length === 0) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+
+    svc.emitDeletion({
+      data: {
+        onPersonDeleted: {
+          id: 'http://example.org/dylan',
+          ex_name: 'Dylan',
+        },
+      },
+    });
+
+    await waitForReadable(iterator);
+    const bindings = iterator.read();
+    expect(bindings).not.toBeNull();
+    expect(isAddition(bindings!)).toBe(false);
   });
 
-  it('should throw if no valid deletion subscription can be constructed', async() => {
+  it('addition subscription should work if no deletion subscription is present', async() => {
     const svc = createInteractiveGraphqlService(
       'onPersonAdded',
       'onPersonDeleted',
@@ -494,6 +512,64 @@ describe('AsyncResourceIterator', () => {
     const variables = [ DF.variable('person'), DF.variable('name') ];
     const queryMapper = new QueryMapper(schema_string, schema_context);
 
+    const iterator = new AsyncResourceIterator(
+      'http://example.org/test',
+      context,
+      schema_context,
+      queryMapper,
+      op,
+      <MediatorHttp><unknown>svc.mediator,
+      variables,
+      DF,
+      BF,
+    );
+
+    // Wait until both subscription streams are started
+    while (svc.mediator.mediate.mock.calls.length === 0) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+
+    svc.emitAddition({
+      data: {
+        onPersonAdded: {
+          id: 'http://example.org/dylan',
+          ex_name: 'Dylan',
+        },
+      },
+    });
+
+    await waitForReadable(iterator);
+    const bindings = iterator.read();
+    expect(bindings).not.toBeNull();
+    expect(isAddition(bindings!)).toBe(true);
+  });
+
+  it('should throw if no subscription type is defined', async() => {
+    const svc = createInteractiveGraphqlService(
+      'onPersonAdded',
+      'onPersonDeleted',
+    );
+
+    const op = translate(`
+      PREFIX ex: <http://example.org/>
+      SELECT ?person ?name WHERE { ?person ex:name ?name }
+    `);
+
+    const schema_context = { ex: 'http://example.org/' };
+    const schema_string = `
+      type Query {
+        persons: [ex_Person!]!
+      }
+
+      type ex_Person {
+        id: ID!
+        ex_name: String!
+      }
+    `;
+
+    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const queryMapper = new QueryMapper(schema_string, schema_context);
+
     expect(() => new AsyncResourceIterator(
       'http://example.org/test',
       context,
@@ -504,7 +580,7 @@ describe('AsyncResourceIterator', () => {
       variables,
       DF,
       BF,
-    )).toThrow(/Failed to convert SPARQL query to deletion subscription stream/u);
+    )).toThrow(/Failed to convert SPARQL query: neither addition nor deletion subscription streams could be created/u);
   });
 
   it('should throw if init query fails', async() => {
@@ -634,6 +710,81 @@ describe('AsyncResourceIterator', () => {
         }
       });
     });
+  });
+
+  it('should throw if subscription stream recieves errors', async() => {
+    const svc = createInteractiveGraphqlService(
+      'onPersonAdded',
+      'onPersonDeleted',
+      [{ data: { persons: []}}],
+    );
+
+    const op = translate(`
+      PREFIX ex: <http://example.org/>
+      SELECT ?person ?name WHERE { ?person ex:name ?name }
+    `);
+
+    const schema_context = { ex: 'http://example.org/' };
+    const schema_string = `
+      type Query {
+        persons: [ex_Person!]!
+      }
+
+      type Subscription {
+        onPersonAdded: ex_Person!
+        onPersonDeleted: ex_Person!
+      }
+
+      type ex_Person {
+        id: ID!
+        ex_name: String!
+      }
+    `;
+
+    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const queryMapper = new QueryMapper(schema_string, schema_context);
+
+    const iterator = new AsyncResourceIterator(
+      'http://example.org/test',
+      context,
+      schema_context,
+      queryMapper,
+      op,
+      <MediatorHttp><unknown>svc.mediator,
+      variables,
+      DF,
+      BF,
+    );
+
+    // Wait until both subscription streams are started
+    while (svc.mediator.mediate.mock.calls.length < 3) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+
+    svc.emitAddition({
+      errors: [{
+        message: 'Error message',
+      }],
+    });
+
+    svc.emitDeletion({
+      errors: [{
+        message: 'Error message',
+      }],
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      iterator.on('error', (err) => {
+        try {
+          expect(err.message).toMatch(/Received error on addition stream/u);
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+
+    svc.close();
   });
 
   it('should throw when paginated request fails', async() => {
