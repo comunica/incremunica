@@ -1,0 +1,17 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/runner/^4.0.0/components/context.jsonld",
+
+    "https://linkedsoftwaredependencies.org/bundles/npm/@incremunica/actor-query-source-identify-stream-graphql/^2.0.0/components/context.jsonld"
+  ],
+  "@id": "urn:comunica:default:Runner",
+  "@type": "Runner",
+  "actors": [
+    {
+      "@id": "urn:comunica:default:query-source-identify/actors#stream-graphql",
+      "@type": "ActorQuerySourceIdentifyStreamGraphql",
+      "mediatorContextPreprocess": { "@id": "urn:comunica:default:context-preprocess/mediators#main" },
+      "mediatorRdfMetadataAccumulate": { "@id": "urn:comunica:default:rdf-metadata-accumulate/mediators#main" }
+    }
+  ]
+}

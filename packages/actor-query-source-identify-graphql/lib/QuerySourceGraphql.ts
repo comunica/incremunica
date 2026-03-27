@@ -17,8 +17,6 @@ import { AsyncResourceIterator } from './AsyncResourceIterator';
 
 export class QuerySourceGraphql implements IQuerySource {
   protected readonly selectorShape: FragmentSelectorShape;
-  protected readonly schemaSelectorShape: FragmentSelectorShape;
-  protected readonly tripleSelectorShape: FragmentSelectorShape;
   public referenceValue: string;
   protected readonly source: string;
 
@@ -44,23 +42,7 @@ export class QuerySourceGraphql implements IQuerySource {
     this.mediatorHttp = mediator;
 
     const AF = new Factory(<RDF.DataFactory> this.dataFactory);
-    this.tripleSelectorShape = {
-      type: 'operation',
-      operation: {
-        operationType: 'pattern',
-        pattern: AF.createPattern(
-          this.dataFactory.variable('s'),
-          this.dataFactory.variable('p'),
-          this.dataFactory.variable('o'),
-        ),
-      },
-      variablesOptional: [
-        this.dataFactory.variable('s'),
-        this.dataFactory.variable('p'),
-        this.dataFactory.variable('o'),
-      ],
-    };
-    this.schemaSelectorShape = {
+    this.selectorShape = {
       type: 'disjunction',
       children: [
         {
@@ -77,13 +59,27 @@ export class QuerySourceGraphql implements IQuerySource {
             type: Algebra.types.BGP,
           },
         },
-        this.tripleSelectorShape,
+        {
+          type: 'operation',
+          operation: {
+            operationType: 'pattern',
+            pattern: AF.createPattern(
+              this.dataFactory.variable('s'),
+              this.dataFactory.variable('p'),
+              this.dataFactory.variable('o'),
+            ),
+          },
+          variablesOptional: [
+            this.dataFactory.variable('s'),
+            this.dataFactory.variable('p'),
+            this.dataFactory.variable('o'),
+          ],
+        }
       ],
     };
 
     this.queryContext = schema_context;
     this.queryMapper = new QueryMapper(schema_source, schema_context);
-    this.selectorShape = this.schemaSelectorShape;
   }
 
   public async getSelectorShape(): Promise<FragmentSelectorShape> {
