@@ -1032,6 +1032,241 @@ describe('AsyncResourceIterator', () => {
     });
   });
 
+  it('delete should emit inverse of all additions', async() => {
+    const svc = createInteractiveGraphqlService(
+      'onPersonAdded',
+      'onPersonDeleted',
+      [{ data: { persons: []}}],
+    );
+
+    const op = translate(`
+      PREFIX ex: <http://example.org/>
+      SELECT ?person ?name WHERE { ?person ex:name ?name }
+    `);
+
+    const schema_context = { ex: 'http://example.org/' };
+    const schema_string = `
+      type Subscription {
+        onPersonAdded: ex_Person!
+      }
+
+      type ex_Person {
+        id: ID!
+        ex_name: String!
+      }
+    `;
+
+    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const queryMapper = new QueryMapper(schema_string, schema_context);
+
+    const iterator = new AsyncResourceIterator(
+      'http://example.org/test',
+      context,
+      schema_context,
+      queryMapper,
+      op,
+      <MediatorHttp><unknown>svc.mediator,
+      variables,
+      DF,
+      BF,
+    );
+
+    // Wait for subscription
+    while (svc.mediator.mediate.mock.calls.length === 0) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    svc.emitAddition({
+      data: {
+        onPersonAdded: {
+          id: 'http://example.org/alice',
+          ex_name: 'Alice',
+        },
+      },
+    });
+
+    await waitForReadable(iterator);
+    iterator.read(); // Consume addition
+
+    // Trigger delete
+    const stopStreamFn = iterator.getProperty<() => void>('delete');
+    expect(stopStreamFn).toBeDefined();
+    stopStreamFn!();
+
+    await waitForReadable(iterator);
+    const inverse = iterator.read();
+
+    expect(inverse).not.toBeNull();
+    expect(isAddition(inverse!)).toBe(false);
+  });
+
+  it('delete should cancel out additions with prior deletions', async() => {
+    const svc = createInteractiveGraphqlService(
+      'onPersonAdded',
+      'onPersonDeleted',
+      [{ data: { persons: []}}],
+    );
+
+    const op = translate(`
+      PREFIX ex: <http://example.org/>
+      SELECT ?person ?name WHERE { ?person ex:name ?name }
+    `);
+
+    const schema_context = { ex: 'http://example.org/' };
+    const schema_string = `
+      type Subscription {
+        onPersonAdded: ex_Person!
+        onPersonDeleted: ex_Person!
+      }
+
+      type ex_Person {
+        id: ID!
+        ex_name: String!
+      }
+    `;
+
+    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const queryMapper = new QueryMapper(schema_string, schema_context);
+
+    const iterator = new AsyncResourceIterator(
+      'http://example.org/test',
+      context,
+      schema_context,
+      queryMapper,
+      op,
+      <MediatorHttp><unknown>svc.mediator,
+      variables,
+      DF,
+      BF,
+    );
+
+    while (svc.mediator.mediate.mock.calls.length < 2) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    // Add then delete same binding
+    const event = {
+      data: {
+        onPersonAdded: {
+          id: 'http://example.org/alice',
+          ex_name: 'Alice',
+        },
+      },
+    };
+
+    svc.emitAddition(event);
+    svc.emitAddition(event);
+    svc.emitDeletion({
+      data: {
+        onPersonDeleted: event.data.onPersonAdded,
+      },
+    });
+    svc.emitDeletion({
+      data: {
+        onPersonDeleted: event.data.onPersonAdded,
+      },
+    });
+
+    await waitForReadable(iterator);
+    iterator.read(); // Addition
+
+    await waitForReadable(iterator);
+    iterator.read(); // Addition
+
+    await waitForReadable(iterator);
+    iterator.read(); // Deletion
+
+    await waitForReadable(iterator);
+    iterator.read(); // Deletion
+
+    iterator.getProperty<() => void>('delete')!();
+
+    // Should produce nothing (cancelled out)
+    expect(iterator.readable).toBe(false);
+  });
+
+  it('delete should respect multiplicities', async() => {
+    const svc = createInteractiveGraphqlService(
+      'onPersonAdded',
+      'onPersonDeleted',
+      [{ data: { persons: []}}],
+    );
+
+    const op = translate(`
+      PREFIX ex: <http://example.org/>
+      SELECT ?person ?name WHERE { ?person ex:name ?name }
+    `);
+
+    const schema_context = { ex: 'http://example.org/' };
+    const schema_string = `
+      type Subscription {
+        onPersonAdded: ex_Person!
+        onPersonDeleted: ex_Person!
+      }
+
+      type ex_Person {
+        id: ID!
+        ex_name: String!
+      }
+    `;
+
+    const variables = [ DF.variable('person'), DF.variable('name') ];
+    const queryMapper = new QueryMapper(schema_string, schema_context);
+
+    const iterator = new AsyncResourceIterator(
+      'http://example.org/test',
+      context,
+      schema_context,
+      queryMapper,
+      op,
+      <MediatorHttp><unknown>svc.mediator,
+      variables,
+      DF,
+      BF,
+    );
+
+    while (svc.mediator.mediate.mock.calls.length < 2) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    const event = {
+      data: {
+        onPersonAdded: {
+          id: 'http://example.org/alice',
+          ex_name: 'Alice',
+        },
+      },
+    };
+
+    // Add twice
+    svc.emitAddition(event);
+    svc.emitAddition(event);
+
+    // Delete once
+    svc.emitDeletion({
+      data: {
+        onPersonDeleted: event.data.onPersonAdded,
+      },
+    });
+
+    // Consume stream
+    for (let i = 0; i < 3; i++) {
+      await waitForReadable(iterator);
+      iterator.read();
+    }
+
+    iterator.getProperty<() => void>('delete')!();
+
+    await waitForReadable(iterator);
+    const result = iterator.read();
+
+    expect(result).not.toBeNull();
+    expect(isAddition(result!)).toBe(false);
+
+    // Only one inverse should remain
+    expect(iterator.readable).toBe(false);
+  });
+
   describe('updateQueryCursor', () => {
     it('injects cursor at root field when no args exist', () => {
       const query = `query { users { id } }`;

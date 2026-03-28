@@ -1,6 +1,3 @@
-import {
-  LinkedRdfSourcesAsyncRdfIterator,
-} from '@comunica/actor-query-source-identify-hypermedia/lib/LinkedRdfSourcesAsyncRdfIterator';
 import type { MediatorContextPreprocess } from '@comunica/bus-context-preprocess';
 import { ActorQuerySourceIdentify } from '@comunica/bus-query-source-identify';
 import type {
@@ -10,9 +7,9 @@ import type {
 } from '@comunica/bus-rdf-metadata-accumulate';
 import { KeysInitQuery, KeysQueryOperation } from '@comunica/context-entries';
 import { ActionContext, Bus } from '@comunica/core';
-import { BindingsStream, type Bindings, type IActionContext, type IQueryBindingsOptions, type IQuerySource, type MetadataBindings } from '@comunica/types';
+import type { IActionContext, MetadataBindings } from '@comunica/types';
 import { MetadataValidationState } from '@comunica/utils-metadata';
-import { KeysBindings, KeysStreamingSource } from '@incremunica/context-entries';
+import { KeysBindings } from '@incremunica/context-entries';
 import {
   createTestContextWithDataFactory,
   AF,
@@ -23,12 +20,11 @@ import {
 } from '@incremunica/dev-tools';
 import type { IQuerySourceStreamElement } from '@incremunica/types';
 import { ArrayIterator, AsyncIterator } from 'asynciterator';
+import { Algebra } from 'sparqlalgebrajs';
 import { ActorQuerySourceIdentifyStreamGraphql } from '../lib';
 import 'jest-rdf';
 import '@comunica/utils-jest';
 import { StreamingQuerySourceStreamGraphql } from '../lib/StreamingQuerySourceStreamGraphql';
-import { Algebra } from 'sparqlalgebrajs';
-import { Operation } from 'sparqlalgebrajs/lib/algebra';
 
 // @ts-expect-error
 const mediatorRdfMetadataAccumulate: MediatorRdfMetadataAccumulate = {
@@ -123,9 +119,22 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
                     ],
                   });
 
+                  it.setProperty('delete', () => {
+                    it.read = () => {
+                      if (it.readable) {
+                        it.readable = false;
+                        return BF.bindings([
+                          [ DF.variable('v'), DF.namedNode('a') ],
+                        ]).setContextEntry(KeysBindings.isAddition, false);
+                      }
+                      return null;
+                    };
+                    it.readable = true;
+                  });
+
                   return it;
                 },
-                toString: () => "QuerySourceGraphql"
+                toString: () => 'QuerySourceGraphql',
               },
               context: new ActionContext(),
             }]),
@@ -211,7 +220,7 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
                 DF.variable('p'),
                 DF.variable('o'),
               ],
-            }
+            },
           ],
         });
         await expect(result.querySource.source.queryVoid(
@@ -419,7 +428,7 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
             isAddition: true,
             querySource: {
               value: 'http://example.org/',
-              type: 'graphql'
+              type: 'graphql',
             },
           },
         ];
@@ -442,7 +451,6 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
       });
 
       it('should not work with other source type', async() => {
-
         jest.spyOn(mediatorContextPreprocess, 'mediate').mockImplementation((action) => {
           return Promise.resolve({
             context: action.context.set(KeysQueryOperation.querySources, [{
@@ -468,9 +476,22 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
                     ],
                   });
 
+                  it.setProperty('delete', () => {
+                    it.read = () => {
+                      if (it.readable) {
+                        it.readable = false;
+                        return BF.bindings([
+                          [ DF.variable('v'), DF.namedNode('a') ],
+                        ]).setContextEntry(KeysBindings.isAddition, false);
+                      }
+                      return null;
+                    };
+                    it.readable = true;
+                  });
+
                   return it;
                 },
-                toString: () => "OtherQuerySource",
+                toString: () => 'OtherQuerySource',
               },
               context: new ActionContext(),
             }]),
@@ -627,6 +648,63 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
           1,
           { context: context.set(KeysInitQuery.querySourcesUnidentified, [ 'http://example.org/' ]) },
         );
+      });
+
+      it('should fail if no delete function found (1)', async() => {
+        jest.spyOn(mediatorContextPreprocess, 'mediate').mockImplementation((action) => {
+          return Promise.resolve({
+            context: action.context.set(KeysQueryOperation.querySources, [{
+              source: <any>{
+                queryBindings: (operation, currentContext, options) => {
+                  const it = new ArrayIterator<Bindings>([
+                    BF.bindings([[ DF.variable('v'), DF.namedNode('a') ]]),
+                  ]);
+
+                  it.setProperty('metadata', {
+                    state: new MetadataValidationState(),
+                    cardinality: { type: 'exact', value: 1 },
+                    variables: [
+                      { variable: DF.variable('v'), canBeUndef: false },
+                    ],
+                  });
+
+                  return it;
+                },
+                toString: () => 'QuerySourceGraphql',
+              },
+              context: action.context,
+            }]),
+          });
+        });
+        source = testBufferIterator([
+          {
+            isAddition: true,
+            querySource: 'http://example.org/',
+          },
+          null,
+          {
+            isAddition: false,
+            querySource: 'http://example.org/',
+          },
+        ]);
+        source.readable = true;
+        const result = (await actor.run({
+          querySourceUnidentified: { type: 'stream', value: <any>source },
+          context,
+        })).querySource;
+        const bindingsStream = result.source.queryBindings(
+          AF.createPattern(DF.variable('s'), DF.namedNode('p'), DF.variable('o')),
+          new ActionContext(),
+        );
+        await expect(new Promise<void>((_resolve, reject) => {
+          bindingsStream.on('data', () => {
+            source.readable = true;
+          });
+          bindingsStream.on('error', (e) => {
+            reject(e);
+          });
+        })).rejects.toThrow('No delete function found.');
+        bindingsStream.destroy();
       });
 
       it('should use sources that already identified', async() => {

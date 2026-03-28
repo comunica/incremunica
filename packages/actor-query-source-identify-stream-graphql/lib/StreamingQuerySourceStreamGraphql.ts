@@ -13,14 +13,13 @@ import type {
   MetadataBindings,
 } from '@comunica/types';
 import { MetadataValidationState } from '@comunica/utils-metadata';
-import { KeysBindings, KeysStreamingSource } from '@incremunica/context-entries';
+import { KeysStreamingSource } from '@incremunica/context-entries';
 import { Queue } from '@incremunica/data-structures';
 import type { IQuerySourceStreamElement, QuerySourceStream } from '@incremunica/types';
 import type * as RDF from '@rdfjs/types';
-import { AsyncIterator, range, UnionIterator } from 'asynciterator';
+import { AsyncIterator, UnionIterator } from 'asynciterator';
 import { Algebra, Factory, Util } from 'sparqlalgebrajs';
 import type { Operation } from 'sparqlalgebrajs/lib/algebra';
-import { isAddition } from '../../user-tools/lib';
 
 enum SourceState {
   identify,
@@ -165,7 +164,7 @@ export class StreamingQuerySourceStreamGraphql implements IQuerySource {
             this.dataFactory.variable('p'),
             this.dataFactory.variable('o'),
           ],
-        }
+        },
       ],
     };
   }
@@ -232,42 +231,16 @@ export class StreamingQuerySourceStreamGraphql implements IQuerySource {
           // We ignore errors in the metadata as this would not change the results
         });
       });
-      
-      // keep track of additions, so they can be deleted if the source is removed
-      const bindingsMap = new Map<string, [Bindings, number]>();
-      bindingsStream.on('data', b => {
-        console.log("storing stream data!");
-        const key = b.toString();
-        if (isAddition(b)) {
-          const entry = bindingsMap.get(key);
-          if (!entry) {
-            bindingsMap.set(key, [b, 1]);
-          } else {
-            const [bindings, count] = entry;
-            bindingsMap.set(key, [bindings, count + 1]);
-          }
-        } else {
-          const entry = bindingsMap.get(key);
-          if (entry) {
-            const [bindings, count] = entry;
-            if (count > 1) {
-              bindingsMap.set(key, [bindings, count - 1]);
-            } else {
-              bindingsMap.delete(key);
-            }
-          }
-        }
-      });
 
-      sourceWrapper.deleteCallbacks.push(() => {
-        const entries = Array.from(bindingsMap.values());
-        for (const [bindings, count] of entries) {
-          for (let i = 0; i < count; i++) {
-            bindingsStream.append([bindings]);
-          }
-        }
-        bindingsMap.clear();
-      });
+      // Make sure delete function is called when source is deleted
+      console.log("ITERATOR WITH PROPERTIES: ", bindingsStream.getProperties());
+      let stopStreamFn = bindingsStream.getProperty<() => void>('delete');
+      if (!stopStreamFn) {
+        console.log("no stop stream function found.....");
+        stopStreamFn = () => iterator.destroy(new Error('No delete function found.'));
+      }
+
+      sourceWrapper.deleteCallbacks.push(stopStreamFn);
 
       return bindingsStream;
     };
@@ -299,14 +272,16 @@ export class StreamingQuerySourceStreamGraphql implements IQuerySource {
   }
 
   private pushAllowed(
-    sourceWrapper: ISourceWrapper, 
-    buffer: Queue<ISourceWrapper>, 
-    iterator?: AsyncIterator<BindingsStream>
+    sourceWrapper: ISourceWrapper,
+    buffer: Queue<ISourceWrapper>,
+    iterator?: AsyncIterator<BindingsStream>,
   ): void {
     // Only allow graphql sources
     if (sourceWrapper.source?.toString().startsWith('QuerySourceGraphql')) {
       buffer.push(sourceWrapper);
-      if (iterator) iterator.readable = true;
+      if (iterator) {
+        iterator.readable = true;
+      }
     } else {
       this.error = new Error('Only allows graphql sources.');
       this.sourcesEventEmitter.emit('error', this.error);

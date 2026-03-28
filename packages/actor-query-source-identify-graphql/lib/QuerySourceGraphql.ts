@@ -74,7 +74,7 @@ export class QuerySourceGraphql implements IQuerySource {
             this.dataFactory.variable('p'),
             this.dataFactory.variable('o'),
           ],
-        }
+        },
       ],
     };
 
@@ -109,6 +109,8 @@ export class QuerySourceGraphql implements IQuerySource {
       cardinality: { type: 'estimate', value: 1 },
       variables: variables.map(variable => ({ variable, canBeUndef: false })),
     });
+
+    console.log("ITERATOR WITH PROPERTIES: ", iterator.getProperties());
     return iterator;
   }
 
