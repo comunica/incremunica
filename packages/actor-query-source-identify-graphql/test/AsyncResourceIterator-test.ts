@@ -1098,6 +1098,18 @@ describe('AsyncResourceIterator', () => {
 
     expect(inverse).not.toBeNull();
     expect(isAddition(inverse!)).toBe(false);
+
+    // No new items should be made
+    expect(iterator.closed).toBe(true);
+    svc.emitAddition({
+      data: {
+        onPersonAdded: {
+          id: 'http://example.org/bob',
+          ex_name: 'Bob',
+        },
+      },
+    });
+    expect(iterator.readable).toBe(false);
   });
 
   it('delete should cancel out additions with prior deletions', async() => {

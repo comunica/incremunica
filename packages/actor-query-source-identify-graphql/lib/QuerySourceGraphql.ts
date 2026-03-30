@@ -110,7 +110,6 @@ export class QuerySourceGraphql implements IQuerySource {
       variables: variables.map(variable => ({ variable, canBeUndef: false })),
     });
 
-    console.log("ITERATOR WITH PROPERTIES: ", iterator.getProperties());
     return iterator;
   }
 

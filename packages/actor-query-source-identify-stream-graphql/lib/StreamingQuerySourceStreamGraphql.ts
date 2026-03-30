@@ -13,13 +13,13 @@ import type {
   MetadataBindings,
 } from '@comunica/types';
 import { MetadataValidationState } from '@comunica/utils-metadata';
-import { KeysStreamingSource } from '@incremunica/context-entries';
 import { Queue } from '@incremunica/data-structures';
 import type { IQuerySourceStreamElement, QuerySourceStream } from '@incremunica/types';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator, UnionIterator } from 'asynciterator';
 import { Algebra, Factory, Util } from 'sparqlalgebrajs';
 import type { Operation } from 'sparqlalgebrajs/lib/algebra';
+import { AsyncResourceIterator } from '../../actor-query-source-identify-graphql/lib/AsyncResourceIterator';
 
 enum SourceState {
   identify,
@@ -213,8 +213,8 @@ export class StreamingQuerySourceStreamGraphql implements IQuerySource {
       if (sourceWrapper.state === SourceState.deleted) {
         return iterator.read();
       }
-      const currentContext = context.set(KeysStreamingSource.matchOptions, []);
-      const bindingsStream = sourceWrapper.source!.queryBindings(operation, currentContext, options);
+
+      const bindingsStream = sourceWrapper.source!.queryBindings(operation, context, options);
       bindingsStream.getProperty('metadata', (metadata: MetadataBindings) => {
         this.mediatorRdfMetadataAccumulate.mediate({
           mode: 'append',
@@ -233,11 +233,19 @@ export class StreamingQuerySourceStreamGraphql implements IQuerySource {
       });
 
       // Make sure delete function is called when source is deleted
-      console.log("ITERATOR WITH PROPERTIES: ", bindingsStream.getProperties());
       let stopStreamFn = bindingsStream.getProperty<() => void>('delete');
       if (!stopStreamFn) {
-        console.log("no stop stream function found.....");
-        stopStreamFn = () => iterator.destroy(new Error('No delete function found.'));
+        // Either the source of the bindingsStream (as the bindingsStream is probably a mapping iterator from the
+        // skolemization) is possibly a AsyncResourceIterator
+        let resourceIterator: AsyncResourceIterator | undefined;
+        if ((<any>bindingsStream)._source instanceof AsyncResourceIterator) {
+          resourceIterator = (<any>bindingsStream)._source;
+        }
+
+        stopStreamFn = resourceIterator?.getProperty<() => void>('delete');
+        if (!stopStreamFn) {
+          stopStreamFn = () => iterator.destroy(new Error('No delete function found.'));
+        }
       }
 
       sourceWrapper.deleteCallbacks.push(stopStreamFn);

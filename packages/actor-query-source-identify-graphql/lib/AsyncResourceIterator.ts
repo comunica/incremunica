@@ -36,6 +36,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   protected activeSources: Set<SourceType> = new Set();
   protected additions: Bindings[] = [];
   protected deletions: Map<string, number> = new Map();
+  protected deleting = false;
 
   public constructor(
     source: string,
@@ -105,9 +106,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       const inverse: Bindings[] = [];
 
       for (const add of this.additions) {
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        const key = add.toString();
-        console.log("key: ", key);
+        const key = String(add);
 
         if (this.deletions.has(key)) {
           const count = this.deletions.get(key)! - 1;
@@ -125,7 +124,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       }
 
       this.push(inverse);
-      this.close();
+      this.deleting = true;
     });
   }
 
@@ -137,17 +136,27 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     }
 
     this.readable = this.buffer.length > 0;
+
+    // Close the stream if all deletions have been added
+    if (!this.readable && this.deleting) {
+      this.close();
+    }
+
     return bindings;
   }
 
   private push(bindings: Bindings[]): void {
+    // Don't add new elements when deleting/closing the iterator
+    if (this.deleting || this.closed) {
+      return;
+    }
+
     for (const b of bindings) {
       this.buffer.push(b);
       if (isAddition(b)) {
         this.additions.push(b);
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        const key = b.toString();
+        const key = String(b);
         this.deletions.set(key, (this.deletions.get(key) ?? 0) + 1);
       }
     }

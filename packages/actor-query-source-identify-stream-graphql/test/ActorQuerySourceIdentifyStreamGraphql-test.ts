@@ -21,6 +21,7 @@ import {
 import type { IQuerySourceStreamElement } from '@incremunica/types';
 import { ArrayIterator, AsyncIterator } from 'asynciterator';
 import { Algebra } from 'sparqlalgebrajs';
+import { AsyncResourceIterator } from '../../actor-query-source-identify-graphql/lib/AsyncResourceIterator';
 import { ActorQuerySourceIdentifyStreamGraphql } from '../lib';
 import 'jest-rdf';
 import '@comunica/utils-jest';
@@ -648,6 +649,117 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
           1,
           { context: context.set(KeysInitQuery.querySourcesUnidentified, [ 'http://example.org/' ]) },
         );
+      });
+
+      it('should use AsyncResourceIterator delete property', async() => {
+        const deleteFn = jest.fn();
+
+        jest.spyOn(mediatorContextPreprocess, 'mediate').mockImplementation((action) => {
+          return Promise.resolve({
+            context: action.context.set(KeysQueryOperation.querySources, [{
+              source: <any>{
+                queryBindings: () => {
+                  const it = new AsyncIterator<any>();
+
+                  // Fake AsyncResourceIterator instance
+                  const fakeResourceIterator = Object.create(AsyncResourceIterator.prototype);
+
+                  // Attach delete function to resource iterator
+                  fakeResourceIterator.getProperty = (key: string) => {
+                    if (key === 'delete') {
+                      return () => {
+                        deleteFn();
+                        it.read = () => {
+                          if (it.readable) {
+                            it.readable = false;
+                            return BF.bindings([
+                              [ DF.variable('v'), DF.namedNode('a') ],
+                            ]).setContextEntry(KeysBindings.isAddition, false);
+                          }
+                          return null;
+                        };
+                        it.readable = true;
+                      };
+                    }
+                    return undefined;
+                  };
+
+                  (<any>it)._source = fakeResourceIterator;
+
+                  // Minimal metadata (required by pipeline)
+                  it.setProperty('metadata', {
+                    state: new MetadataValidationState(),
+                    cardinality: { type: 'exact', value: 1 },
+                    variables: [
+                      { variable: DF.variable('v'), canBeUndef: false },
+                    ],
+                  });
+
+                  it.read = () => {
+                    if (it.readable) {
+                      it.readable = false;
+                      return BF.bindings([
+                        [ DF.variable('v'), DF.namedNode('a') ],
+                      ]).setContextEntry(KeysBindings.isAddition, true);
+                    }
+                    return null;
+                  };
+                  it.readable = true;
+
+                  return it;
+                },
+                toString: () => 'QuerySourceGraphql',
+              },
+              context: action.context,
+            }]),
+          });
+        });
+
+        const sources = [
+          {
+            isAddition: true,
+            querySource: 'http://example.org/',
+          },
+          {
+            isAddition: false,
+            querySource: 'http://example.org/',
+          },
+        ];
+        source = new AsyncIterator();
+        source.read = () => {
+          if (sources.length === 0) {
+            source.close();
+            return null;
+          }
+          if (source.readable) {
+            source.readable = false;
+            return sources.shift();
+          }
+          source.readable = false;
+          return null;
+        };
+        source.readable = true;
+        const result = await actor.run({
+          querySourceUnidentified: { type: 'stream-graphql', value: <any>source },
+          context,
+        });
+
+        const bindings = result.querySource.source.queryBindings(
+          AF.createPattern(DF.variable('s'), DF.namedNode('p'), DF.variable('o')),
+          new ActionContext(),
+        );
+
+        // Read the source
+        await expect(partialArrayifyAsyncIterator(bindings, 1)).resolves.toEqualBindingsArray([
+          BF.bindings([[ DF.variable('v'), DF.namedNode('a') ]]).setContextEntry(KeysBindings.isAddition, true),
+        ]);
+
+        // Delete the source
+        source.readable = true;
+        await expect(partialArrayifyAsyncIterator(bindings, 1)).resolves.toEqualBindingsArray([
+          BF.bindings([[ DF.variable('v'), DF.namedNode('a') ]]).setContextEntry(KeysBindings.isAddition, false),
+        ]);
+        expect(deleteFn).toHaveBeenCalledTimes(1);
       });
 
       it('should fail if no delete function found (1)', async() => {
