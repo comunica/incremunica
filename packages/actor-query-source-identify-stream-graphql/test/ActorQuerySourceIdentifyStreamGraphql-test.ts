@@ -455,7 +455,7 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
         jest.spyOn(mediatorContextPreprocess, 'mediate').mockImplementation((action) => {
           return Promise.resolve({
             context: action.context.set(KeysQueryOperation.querySources, [{
-              source: {
+              source: <any> {
                 queryBindings: () => {
                   const it = new AsyncIterator();
                   it.read = () => {
@@ -601,6 +601,68 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
           1,
           { context: context.set(KeysInitQuery.querySourcesUnidentified, [ sources[0].querySource ]) },
         );
+      });
+
+      it('should skip deleted source wrappers from the query buffer', async() => {
+        let resolveContextPreprocess: ((value: any) => void) | undefined;
+        const queryBindingsMock = jest.fn(() => {
+          const it = new AsyncIterator();
+          it.read = () => null;
+          it.readable = false;
+          it.setProperty('metadata', {
+            state: new MetadataValidationState(),
+            cardinality: { type: 'exact', value: 1 },
+            variables: [
+              { variable: DF.variable('v'), canBeUndef: false },
+            ],
+          });
+          it.setProperty('delete', () => {
+            // No-op
+          });
+          return it;
+        });
+        jest.spyOn(mediatorContextPreprocess, 'mediate').mockImplementation(() => {
+          return new Promise((resolve) => {
+            resolveContextPreprocess = resolve;
+          });
+        });
+
+        const sourceBuffer: (IQuerySourceStreamElement | null)[] = [];
+        source = testBufferIterator(sourceBuffer);
+        const result = (await actor.run({
+          querySourceUnidentified: { type: 'stream-graphql', value: <any> source },
+          context,
+        })).querySource;
+        const bindingsStream = result.source.queryBindings(
+          AF.createPattern(DF.variable('s'), DF.namedNode('p'), DF.variable('o')),
+          new ActionContext(),
+        );
+
+        sourceBuffer.push({
+          isAddition: true,
+          querySource: 'http://example.org/',
+        });
+        sourceBuffer.push({
+          isAddition: false,
+          querySource: 'http://example.org/',
+        });
+        sourceBuffer.push(null);
+        source.readable = true;
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+        resolveContextPreprocess!({
+          context: new ActionContext().set(KeysQueryOperation.querySources, [{
+            source: <any> {
+              queryBindings: queryBindingsMock,
+              toString: () => 'QuerySourceGraphql',
+            },
+            context: new ActionContext(),
+          }]),
+        });
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        expect(bindingsStream.read()).toBeNull();
+        expect(queryBindingsMock).not.toHaveBeenCalled();
       });
 
       it('should work with slow deletions', async() => {
@@ -766,9 +828,9 @@ describe('ActorQuerySourceIdentifyStreamGraphql', () => {
         jest.spyOn(mediatorContextPreprocess, 'mediate').mockImplementation((action) => {
           return Promise.resolve({
             context: action.context.set(KeysQueryOperation.querySources, [{
-              source: <any>{
-                queryBindings: (operation, currentContext, options) => {
-                  const it = new ArrayIterator<Bindings>([
+              source: <any> {
+                queryBindings: () => {
+                  const it = new ArrayIterator([
                     BF.bindings([[ DF.variable('v'), DF.namedNode('a') ]]),
                   ]);
 
