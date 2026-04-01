@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.4"></a>
+## [v2.3.4](https://github.com/comunica/incremunica/compare/v2.3.3...v2.3.4) - 2026-04-01
+
+* [fix: filter not exist issue](https://github.com/comunica/incremunica/commit/c5964e7400252cd424174479743be375bb932a1c)
+* [Merge pull request #151 from ponachte/graphql-support](https://github.com/comunica/incremunica/commit/fb4c966cb6f5d8a88c4459761ed5c7296a89f756)
+* [fix: missing deps + missing test](https://github.com/comunica/incremunica/commit/4dedf12974943a1553830a0566f512d9e89b337a)
+* [fixed skolemize bug](https://github.com/comunica/incremunica/commit/0ea7eb1ad54df08e0a31c6eab0db2326c361b4c6)
+* [iterator property not propagating bug](https://github.com/comunica/incremunica/commit/da82c927d45419f4e6047c63a5c99258e8032ff8)
+* [actor-query-source-identify-stream-graphql timeout bug](https://github.com/comunica/incremunica/commit/c34c5b656a533130fb09eb2e81bc15db5791a4a8)
+* [Merge pull request #150 from comunica/next/minor](https://github.com/comunica/incremunica/commit/af06c201987b7c2aec892dee168071cee38eb1f1)
+
 <a name="v2.3.3"></a>
 ## [v2.3.3](https://github.com/comunica/incremunica/compare/v2.3.2...v2.3.3) - 2026-03-19
 
