@@ -1,5 +1,5 @@
 import type { MediatorHttp } from '@comunica/bus-http';
-import type { IActionContext, ComunicaDataFactory } from '@comunica/types';
+import type { IActionContext, ComunicaDataFactory, Bindings } from '@comunica/types';
 import type { BindingsFactory } from '@comunica/utils-bindings-factory';
 import type { QueryMapper, ResponseMapper } from '@comunica-graphql/sparql2graphql-converter';
 import { KeysBindings } from '@incremunica/context-entries';
@@ -7,6 +7,7 @@ import { Queue } from '@incremunica/data-structures';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
 import type { Algebra } from 'sparqlalgebrajs';
+import { isAddition } from '../../user-tools/lib';
 
 type SourceType = 'addition' | 'deletion' | 'init';
 
@@ -33,6 +34,9 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
   protected buffer: Queue<RDF.Bindings>;
   protected decoder: TextDecoder;
   protected activeSources: Set<SourceType> = new Set();
+  protected additions: Bindings[] = [];
+  protected deletions: Map<string, number> = new Map();
+  protected deleting = false;
 
   public constructor(
     source: string,
@@ -96,6 +100,32 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       // Start subscription if no init query possible
       this.startSubscription();
     }
+
+    // --- set deletion property ---
+    this.setProperty<() => void>('delete', () => {
+      const inverse: Bindings[] = [];
+
+      for (const add of this.additions) {
+        const key = String(add);
+
+        if (this.deletions.has(key)) {
+          const count = this.deletions.get(key)! - 1;
+          if (count < 1) {
+            this.deletions.delete(key);
+          } else {
+            this.deletions.set(key, count);
+          }
+          continue;
+        }
+
+        inverse.push(
+          (<any>add).setContextEntry(KeysBindings.isAddition, false),
+        );
+      }
+
+      this.push(inverse);
+      this.deleting = true;
+    });
   }
 
   public override read(): RDF.Bindings | null {
@@ -106,7 +136,34 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
     }
 
     this.readable = this.buffer.length > 0;
+
+    // Close the stream if all deletions have been added
+    if (!this.readable && this.deleting) {
+      this.close();
+    }
+
     return bindings;
+  }
+
+  private push(bindings: Bindings[]): void {
+    // Don't add new elements when deleting/closing the iterator
+    if (this.deleting || this.closed) {
+      return;
+    }
+
+    for (const b of bindings) {
+      this.buffer.push(b);
+      if (isAddition(b)) {
+        this.additions.push(b);
+      } else {
+        const key = String(b);
+        this.deletions.set(key, (this.deletions.get(key) ?? 0) + 1);
+      }
+    }
+
+    if (bindings.length > 0) {
+      this.readable = true;
+    }
   }
 
   // --- Centralized subscription starter ---
@@ -204,13 +261,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
                 this.bindingsFactory,
               );
 
-              for (const b of bindings) {
-                this.buffer.push(b.setContextEntry(KeysBindings.isAddition, type === 'addition'));
-              }
-
-              if (bindings.length > 0) {
-                this.readable = true;
-              }
+              this.push(bindings.map(b => b.setContextEntry(KeysBindings.isAddition, type === 'addition')));
             }
           }
         }
@@ -251,13 +302,7 @@ export class AsyncResourceIterator extends AsyncIterator<RDF.Bindings> {
       this.bindingsFactory,
     );
 
-    for (const b of bindings) {
-      this.buffer.push(b);
-    }
-
-    if (bindings.length > 0) {
-      this.readable = true;
-    }
+    this.push(bindings);
 
     const paginations = json?.extensions?.pagination?.filter((p: any) => p?.next);
 
