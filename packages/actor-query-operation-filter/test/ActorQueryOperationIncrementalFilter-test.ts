@@ -579,6 +579,116 @@ describe('ActorQueryOperationFilter', () => {
         await expect(output.metadata()).resolves
           .toMatchObject({ cardinality: 3, variables: [{ variable: DF.variable('a'), canBeUndef: false }]});
       });
+
+      it('should mediate the operation inside NOT EXISTS instead of the expression object', async() => {
+        const bindingsStreamMainBGP = new ArrayIterator([
+          BF.bindings([[ DF.variable('a'), DF.literal('1') ]]).setContextEntry(KeysBindings.isAddition, true),
+        ], { autoStart: false });
+        const bindingsStreamFilterBGP = new ArrayIterator<Bindings>([], { autoStart: false });
+        let mainBGP = true;
+        jest.spyOn(mediatorQueryOperation, 'mediate').mockImplementation((arg: any) => {
+          if (arg.operation.type === 'expression') {
+            throw new Error('Should not mediate expression operations.');
+          }
+          if (mainBGP) {
+            mainBGP = false;
+            return Promise.resolve({
+              bindingsStream: bindingsStreamMainBGP,
+              metadata: () => Promise.resolve({
+                cardinality: 1,
+                variables: [{ variable: DF.variable('a'), canBeUndef: false }],
+              }),
+              operated: arg,
+              type: 'bindings',
+            });
+          }
+          return Promise.resolve({
+            bindingsStream: bindingsStreamFilterBGP.clone(),
+            metadata: () => Promise.resolve({
+              cardinality: 0,
+              variables: [{ variable: DF.variable('a'), canBeUndef: false }],
+            }),
+            operated: arg,
+            type: 'bindings',
+          });
+        });
+        const expression = parse('NOT EXISTS { ?a a rdf:example . ?a rdf:value ?b . ?b a rdf:example }');
+        const scopedSource = { source: {}, context: new ActionContext() };
+        (expression.input).metadata = { scopedSource };
+        const op: any = {
+          operation: { type: 'filter', input: {}, expression },
+          context: getMockEEActionContext(new ActionContext({ [KeysInitQuery.baseIRI.name]: 'http://example.com' })),
+        };
+
+        const output: IQueryOperationResultBindings = <any> await actor.run(op, undefined);
+        await expect(output.bindingsStream).toEqualBindingsStream([
+          BF.bindings([[ DF.variable('a'), DF.literal('1') ]]).setContextEntry(KeysBindings.isAddition, true),
+        ]);
+
+        expect(mediatorQueryOperation.mediate).toHaveBeenCalledTimes(2);
+        expect(mediatorQueryOperation.mediate).toHaveBeenNthCalledWith(2, expect.objectContaining({
+          operation: expect.objectContaining({
+            type: 'bgp',
+            metadata: expect.objectContaining({ scopedSource }),
+          }),
+        }));
+      });
+
+      it('should mediate the operation inside EXISTS instead of the expression object', async() => {
+        const bindingsStreamMainBGP = new ArrayIterator([
+          BF.bindings([[ DF.variable('a'), DF.literal('1') ]]).setContextEntry(KeysBindings.isAddition, true),
+        ], { autoStart: false });
+        const bindingsStreamFilterBGP = new ArrayIterator([
+          BF.bindings([[ DF.variable('a'), DF.literal('1') ]]).setContextEntry(KeysBindings.isAddition, true),
+        ], { autoStart: false });
+        let mainBGP = true;
+        jest.spyOn(mediatorQueryOperation, 'mediate').mockImplementation((arg: any) => {
+          if (arg.operation.type === 'expression') {
+            throw new Error('Should not mediate expression operations.');
+          }
+          if (mainBGP) {
+            mainBGP = false;
+            return Promise.resolve({
+              bindingsStream: bindingsStreamMainBGP,
+              metadata: () => Promise.resolve({
+                cardinality: 1,
+                variables: [{ variable: DF.variable('a'), canBeUndef: false }],
+              }),
+              operated: arg,
+              type: 'bindings',
+            });
+          }
+          return Promise.resolve({
+            bindingsStream: bindingsStreamFilterBGP.clone(),
+            metadata: () => Promise.resolve({
+              cardinality: 1,
+              variables: [{ variable: DF.variable('a'), canBeUndef: false }],
+            }),
+            operated: arg,
+            type: 'bindings',
+          });
+        });
+        const expression = parse('EXISTS { ?a a rdf:example . ?a rdf:value ?b . ?b a rdf:example }');
+        const scopedSource = { source: {}, context: new ActionContext() };
+        (expression.input).metadata = { scopedSource };
+        const op: any = {
+          operation: { type: 'filter', input: {}, expression },
+          context: getMockEEActionContext(new ActionContext({ [KeysInitQuery.baseIRI.name]: 'http://example.com' })),
+        };
+
+        const output: IQueryOperationResultBindings = <any> await actor.run(op, undefined);
+        await expect(output.bindingsStream).toEqualBindingsStream([
+          BF.bindings([[ DF.variable('a'), DF.literal('1') ]]).setContextEntry(KeysBindings.isAddition, true),
+        ]);
+
+        expect(mediatorQueryOperation.mediate).toHaveBeenCalledTimes(2);
+        expect(mediatorQueryOperation.mediate).toHaveBeenNthCalledWith(2, expect.objectContaining({
+          operation: expect.objectContaining({
+            type: 'bgp',
+            metadata: expect.objectContaining({ scopedSource }),
+          }),
+        }));
+      });
     });
   });
 });
