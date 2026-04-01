@@ -329,6 +329,65 @@ describe('System test: QuerySparql (without external network)', () => {
 
       streamingStore.end();
     });
+
+    it('query with FILTER NOT EXISTS and multiple inner triple patterns', async() => {
+      streamingStore.addQuad(quad('s1', 'http://example.org/p', 'o1'));
+      streamingStore.addQuad(quad('s2', 'http://example.org/p', 'o2'));
+      streamingStore.addQuad(quad('s2', 'http://example.org/q', 'x1'));
+      streamingStore.addQuad(quad('x1', 'http://example.org/r', 'x2'));
+      streamingStore.addQuad(quad('x2', 'http://example.org/t', 'x3'));
+
+      let bindingStream: BindingsStream | undefined;
+      const getSingleBinding = async(): Promise<Bindings> => {
+        const timeout = Symbol('timeout');
+        const result = await Promise.race([
+          new Promise<Bindings>(resolve => bindingStream!.once('data', resolve)),
+          new Promise<Error>(resolve => bindingStream!.once('error', resolve)),
+          new Promise<symbol>(resolve => setTimeout(() => resolve(timeout), 1_000)),
+        ]);
+        if (result === timeout) {
+          throw new Error('Timed out while waiting for FILTER NOT EXISTS output.');
+        }
+        if (result instanceof Error) {
+          throw result;
+        }
+        return result;
+      };
+
+      try {
+        bindingStream = await engine.queryBindings(`
+        PREFIX ex: <http://example.org/>
+        SELECT ?s WHERE {
+          ?s ex:p ?o .
+          FILTER NOT EXISTS {
+            ?s ex:q ?q .
+            ?q ex:r ?r .
+            ?r ex:t ?t .
+          }
+        }`, {
+          sources: [ streamingStore ],
+        });
+
+        await expect(getSingleBinding()).resolves.toEqualBindings(BF.bindings([
+          [ DF.variable('s'), DF.namedNode('s1') ],
+        ]).setContextEntry(KeysBindings.isAddition, true));
+
+        streamingStore.removeQuad(quad('x2', 'http://example.org/t', 'x3'));
+
+        await expect(getSingleBinding()).resolves.toEqualBindings(BF.bindings([
+          [ DF.variable('s'), DF.namedNode('s2') ],
+        ]).setContextEntry(KeysBindings.isAddition, true));
+
+        streamingStore.addQuad(quad('x2', 'http://example.org/t', 'x3'));
+
+        await expect(getSingleBinding()).resolves.toEqualBindings(BF.bindings([
+          [ DF.variable('s'), DF.namedNode('s2') ],
+        ]).setContextEntry(KeysBindings.isAddition, false));
+      } finally {
+        bindingStream?.destroy();
+        streamingStore.end();
+      }
+    });
   });
 
   describe('simple hypermedia queries', () => {

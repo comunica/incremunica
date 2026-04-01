@@ -76,7 +76,7 @@ export class ActorQueryOperationFilter extends ActorQueryOperationTypedMediated<
             transformMap.set(hash, hashData);
 
             const materializedOperation = materializeOperation(
-              operation.expression,
+              operation.expression.input,
               bindings,
               algebraFactory,
               bindingsFactory,
