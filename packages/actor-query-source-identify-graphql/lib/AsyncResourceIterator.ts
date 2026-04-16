@@ -4,10 +4,10 @@ import type { BindingsFactory } from '@comunica/utils-bindings-factory';
 import type { QueryMapper, ResponseMapper } from '@comunica-graphql/sparql2graphql-converter';
 import { KeysBindings } from '@incremunica/context-entries';
 import { Queue } from '@incremunica/data-structures';
+import { isAddition } from '@incremunica/user-tools';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
 import type { Algebra } from 'sparqlalgebrajs';
-import { isAddition } from '../../user-tools/lib';
 
 type SourceType = 'addition' | 'deletion' | 'init';
 

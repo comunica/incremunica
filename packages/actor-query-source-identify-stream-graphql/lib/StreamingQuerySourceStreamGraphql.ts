@@ -13,13 +13,13 @@ import type {
   MetadataBindings,
 } from '@comunica/types';
 import { MetadataValidationState } from '@comunica/utils-metadata';
+import { AsyncResourceIterator } from '@incremunica/actor-query-source-identify-graphql/lib/AsyncResourceIterator';
 import { Queue } from '@incremunica/data-structures';
 import type { IQuerySourceStreamElement, QuerySourceStream } from '@incremunica/types';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator, UnionIterator } from 'asynciterator';
 import { Algebra, Factory, Util } from 'sparqlalgebrajs';
 import type { Operation } from 'sparqlalgebrajs/lib/algebra';
-import { AsyncResourceIterator } from '../../actor-query-source-identify-graphql/lib/AsyncResourceIterator';
 
 enum SourceState {
   identify,
