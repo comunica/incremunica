@@ -19,7 +19,7 @@ import type * as RDF from '@rdfjs/types';
 import { AsyncIterator, UnionIterator } from 'asynciterator';
 import { Algebra, Factory, Util } from 'sparqlalgebrajs';
 import type { Operation } from 'sparqlalgebrajs/lib/algebra';
-import { AsyncResourceIterator } from '../../actor-query-source-identify-graphql/lib/AsyncResourceIterator';
+import { AsyncResourceIterator } from '@incremunica/actor-query-source-identify-graphql/lib/AsyncResourceIterator';
 
 enum SourceState {
   identify,

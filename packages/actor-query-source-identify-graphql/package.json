@@ -38,7 +38,7 @@
     "build:components": "componentsjs-generator"
   },
   "dependencies": {
-    "@comunica-graphql/sparql2graphql-converter": "^1.1.1",
+    "@comunica-graphql/sparql2graphql-converter": "1.1.2",
     "@comunica/bus-http": "^4.2.0",
     "@comunica/bus-merge-bindings-context": "^4.2.0",
     "@comunica/bus-query-source-identify": "^4.2.0",
@@ -49,6 +49,7 @@
     "@comunica/utils-metadata": "^4.2.0",
     "@incremunica/context-entries": "^2.3.2",
     "@incremunica/data-structures": "^2.2.2",
+    "@incremunica/user-tools": "^2.3.2",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",
     "sparqlalgebrajs": "^4.3.8"

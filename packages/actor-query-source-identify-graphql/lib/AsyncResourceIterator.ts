@@ -7,7 +7,7 @@ import { Queue } from '@incremunica/data-structures';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
 import type { Algebra } from 'sparqlalgebrajs';
-import { isAddition } from '../../user-tools/lib';
+import { isAddition } from '@incremunica/user-tools';
 
 type SourceType = 'addition' | 'deletion' | 'init';
 
