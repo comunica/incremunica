@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.5"></a>
+## [v2.3.5](https://github.com/comunica/incremunica/compare/v2.3.4...v2.3.5) - 2026-04-16
+
+* [fix: lint](https://github.com/comunica/incremunica/commit/0157253535c5f853798e034381a1f5b510cfd955)
+* [Merge pull request #154 from ponachte/graphql-support](https://github.com/comunica/incremunica/commit/0a74090043b5413c0385d98078ca6c6e7c9c188a)
+* [fix package dependencies](https://github.com/comunica/incremunica/commit/d71d3246f482260f91756c08b6f0053102d26b0c)
+* [Merge pull request #152 from comunica/next/minor](https://github.com/comunica/incremunica/commit/f053c9a2a9856e9ccc5a209b24c952bda734a2db)
+
 <a name="v2.3.4"></a>
 ## [v2.3.4](https://github.com/comunica/incremunica/compare/v2.3.3...v2.3.4) - 2026-04-01
 
