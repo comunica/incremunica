@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v2.3.6"></a>
+## [v2.3.6](https://github.com/comunica/incremunica/compare/v2.3.5...v2.3.6) - 2026-06-17
+
+* [Merge pull request #156 from ponachte/sparql2graphql-1.2.5](https://github.com/comunica/incremunica/commit/838d0ca3d8f8189478bf651fd6277e6aa692d19b)
+* [hotfix: bump sparql2graphql v1.1.5](https://github.com/comunica/incremunica/commit/f8a277a64524b642dfc7a3334104bfdab548a5b4)
+
 <a name="v2.3.5"></a>
 ## [v2.3.5](https://github.com/comunica/incremunica/compare/v2.3.4...v2.3.5) - 2026-04-16
 
