@@ -373,10 +373,10 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.6.0.tgz#ec6cd237440700bc23ca23087f513c75508958b0"
   integrity sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==
 
-"@comunica-graphql/sparql2graphql-converter@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@comunica-graphql/sparql2graphql-converter/-/sparql2graphql-converter-1.1.2.tgz#cf1bc3e51f5736ecf453f7bdb154e155ae4dc50d"
-  integrity sha512-ASjy19wu5QDhMFergEtG5UjZPBzMg+vANP7FOTjr/5KqH8nmT3XLk6z0ef0y1Ti5Sqkdfmp4PKOjSl+Yd29suQ==
+"@comunica-graphql/sparql2graphql-converter@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@comunica-graphql/sparql2graphql-converter/-/sparql2graphql-converter-1.1.5.tgz#8099b438ac6dce20452253e2fa80161e0a32fd6d"
+  integrity sha512-mNSpwfpxQYhVZmTuASkLH8qifLRJ/xqErjT3FX9Od0rVM5Ursgs7rK6Rj7MjZYxay5f4EZgGQ4L1zNUSUzPINg==
   dependencies:
     "@comunica/types" "^4.2.0"
     "@comunica/utils-bindings-factory" "^4.2.0"
