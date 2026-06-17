@@ -38,7 +38,7 @@
     "build:components": "componentsjs-generator"
   },
   "dependencies": {
-    "@comunica-graphql/sparql2graphql-converter": "1.1.2",
+    "@comunica-graphql/sparql2graphql-converter": "^1.1.5",
     "@comunica/bus-http": "^4.2.0",
     "@comunica/bus-merge-bindings-context": "^4.2.0",
     "@comunica/bus-query-source-identify": "^4.2.0",
