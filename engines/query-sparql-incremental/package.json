@@ -292,5 +292,6 @@
   },
   "browser": {
     "./lib/index.js": "./lib/index-browser.js"
-  }
+  },
+  "gitHead": "594c8ade2b4694a95732069f719968163e978986"
 }
