@@ -55,7 +55,7 @@
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",
     "imurmurhash": "^0.1.4",
-    "lru-cache": "^10.0.0",
+    "lru-cache": "^11.0.0",
     "rdf-data-factory": "^1.1.2",
     "sparqlalgebrajs": "^5.0.0",
     "sparqljs": "^3.7.3"
