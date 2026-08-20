@@ -57,7 +57,7 @@
     "imurmurhash": "^0.1.4",
     "lru-cache": "^11.0.0",
     "rdf-data-factory": "*",
-    "sparqlalgebrajs": "^5.0.0",
+    "sparqlalgebrajs": "*",
     "sparqljs": "^3.7.3"
   }
 }
