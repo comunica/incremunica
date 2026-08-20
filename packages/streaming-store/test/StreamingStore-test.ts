@@ -7,9 +7,8 @@ import { Store } from 'n3';
 import { DataFactory } from 'rdf-data-factory';
 import { termToString } from 'rdf-string';
 import { Readable } from 'readable-stream';
+import { streamifyArray } from 'streamify-array';
 import { StreamingStore } from '../lib';
-
-const streamifyArray = require('streamify-array');
 
 const DF = new DataFactory();
 

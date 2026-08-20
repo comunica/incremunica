@@ -13,12 +13,11 @@ import { ArrayIterator } from 'asynciterator';
 import { DataFactory } from 'rdf-data-factory';
 import { PassThrough } from 'readable-stream';
 import { Factory } from 'sparqlalgebrajs';
+import { streamifyArray } from 'streamify-array';
 import { StreamingQuerySourceRdfJs } from '../lib';
 import '@incremunica/jest';
 import '@comunica/utils-jest';
 import 'jest-rdf';
-
-const streamifyArray = require('streamify-array');
 
 const DF = new DataFactory();
 const AF = new Factory();
