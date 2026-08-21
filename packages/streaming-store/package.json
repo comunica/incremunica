@@ -39,8 +39,8 @@
   },
   "dependencies": {
     "@rdfjs/types": "*",
-    "@types/n3": "^1.10.4",
-    "@types/readable-stream": "^4.0.0",
+    "@types/n3": "*",
+    "@types/readable-stream": "4.0.20",
     "n3": "^1.16.3",
     "rdf-string": "^2.0.1",
     "rdf-terms": "^2.0.0",

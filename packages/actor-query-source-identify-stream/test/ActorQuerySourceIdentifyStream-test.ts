@@ -116,7 +116,7 @@ const mediatorRdfMetadataAccumulate: MediatorRdfMetadataAccumulate = {
 const mediatorQuerySourceIdentifyHypermedia: MediatorQuerySourceIdentifyHypermedia = {
   async mediate({ quads }: IActionQuerySourceIdentifyHypermedia) {
     const store = new Store();
-    store.import(quads);
+    await store.import(quads);
     return {
       dataset: 'MYDATASET',
       source: <IQuerySource> <any> {
