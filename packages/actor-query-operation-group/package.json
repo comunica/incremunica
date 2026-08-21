@@ -49,6 +49,6 @@
     "@incremunica/data-structures": "^2.2.2",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",
-    "sparqlalgebrajs": "^4.3.8"
+    "sparqlalgebrajs": "*"
   }
 }

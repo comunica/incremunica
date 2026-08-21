@@ -26,13 +26,12 @@ import { DataFactory } from 'rdf-data-factory';
 import type { Stream } from 'readable-stream';
 import { PassThrough } from 'readable-stream';
 import { Algebra, Factory } from 'sparqlalgebrajs';
+import { streamifyArray } from 'streamify-array';
 import {
   ActorRdfJoinInnerComputationalBind,
 } from '../lib';
 import '@comunica/utils-jest';
 import '@incremunica/jest';
-
-const streamifyArray = require('streamify-array');
 
 const DF = new DataFactory();
 const FACTORY = new Factory(DF);

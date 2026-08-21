@@ -9,11 +9,11 @@ import type {
 } from '@incremunica/bus-source-watch';
 import { Store, DataFactory } from 'n3';
 import type { Transform } from 'readable-stream';
+import { streamifyArray } from 'streamify-array';
 import 'jest-rdf';
 import { ActorDetermineChangesNaive } from '../lib';
 
 const quad = require('rdf-quad');
-const streamifyArray = require('streamify-array');
 
 // Captures the number of times an event has been emitted
 function captureEvents(item: EventEmitter, ...events: string[]) {
