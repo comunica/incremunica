@@ -370,16 +370,18 @@ describe('StreamingQuerySourceRdfJs', () => {
         AF.createPattern(DF.variable('s'), DF.namedNode('p'), DF.variable('o'), DF.variable('g')),
         ctx,
       );
+      // N3.js 2 assigns the default graph the lowest internal identifier, so it is
+      // iterated before any named graph.
       await expect(data).toEqualBindingsStream([
-        BF.fromRecord({
-          s: DF.namedNode('s1'),
-          o: DF.namedNode('o1'),
-          g: DF.namedNode('g1'),
-        }).setContextEntry(KeysBindings.isAddition, true),
         BF.fromRecord({
           s: DF.namedNode('s2'),
           o: DF.namedNode('o2'),
           g: DF.defaultGraph(),
+        }).setContextEntry(KeysBindings.isAddition, true),
+        BF.fromRecord({
+          s: DF.namedNode('s1'),
+          o: DF.namedNode('o1'),
+          g: DF.namedNode('g1'),
         }).setContextEntry(KeysBindings.isAddition, true),
       ]);
       //
