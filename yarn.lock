@@ -11372,6 +11372,14 @@ n3@^1.26.0:
     buffer "^6.0.3"
     readable-stream "^4.0.0"
 
+n3@^2.0.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/n3/-/n3-2.4.0.tgz#475aca70afb1343a1929be603cbf4cf94783a954"
+  integrity sha512-rQgwsKqGacptMSFnwRPJxTkfBcuRPd/opAc8V4uLn3/EAFz2nXQdfP2xFlQI38pzFZ/QMggxMQ60HaEVxmeLdg==
+  dependencies:
+    buffer "^6.0.3"
+    readable-stream "^4.0.0"
+
 nanoid@^3.3.6:
   version "3.3.7"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.7.tgz#d0c301a691bc8d54efa0a2226ccf3fe2fd656bd8"
@@ -13501,13 +13509,13 @@ sha.js@^2.4.0, sha.js@^2.4.8:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-shaclc-parse@1.4.3, shaclc-parse@^1.4.0:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/shaclc-parse/-/shaclc-parse-1.4.3.tgz#56de4d03408f0768bf66c70d655cff33ccae410d"
-  integrity sha512-MQJWVFjfzzMUvieFO0STWjIo49ywy63UkVSsr0e8+8xHUns6X+i3yWYxNKd+GtSEJjBNZxxrUubog+hnd7PvRA==
+shaclc-parse@2.0.0, shaclc-parse@^1.4.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/shaclc-parse/-/shaclc-parse-2.0.0.tgz#326fa50202bb5bc104c9bd10e55a9016f21431e9"
+  integrity sha512-YEznPru7QmcIR1lF/lCvvrrcjZ8vWfKBMAketPb2CRWkrA0LUffTzrW0tOepue/evUREkJyl8LeVpcmyyKF+ng==
   dependencies:
     "@rdfjs/types" "^2.0.0"
-    n3 "^1.16.3"
+    n3 "^2.0.0"
 
 shaclc-write@^1.4.2:
   version "1.4.2"
