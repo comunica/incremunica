@@ -73,7 +73,7 @@
     "md5": "^2.3.0",
     "node-polyfill-webpack-plugin": "^4.0.0",
     "nodemon": "^3.0.0",
-    "npm-check-updates": "^17.1.11",
+    "npm-check-updates": "^23.0.0",
     "rdf-data-factory": "^2.0.0",
     "rdf-quad": "^2.0.0",
     "rdf-terms": "^2.0.0",
