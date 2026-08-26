@@ -3,11 +3,15 @@
     "github>rubensworks/renovate-presets:js",
     "docker:disable"
   ],
-  "baseBranches": ["next/minor"],
+  "baseBranchPatterns": [
+    "next/minor"
+  ],
   "packageRules": [
     {
-      "matchSourceUrlPrefixes": ["https://github.com/comunica/comunica"],
-      "groupName": "Comunica monorepo packages"
+      "groupName": "Comunica monorepo packages",
+      "matchSourceUrls": [
+        "https://github.com/comunica/comunica{/,}**"
+      ]
     },
     {
       "matchDepTypes": ["dependencies"],
