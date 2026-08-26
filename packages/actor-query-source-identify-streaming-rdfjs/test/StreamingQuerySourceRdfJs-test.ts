@@ -370,7 +370,7 @@ describe('StreamingQuerySourceRdfJs', () => {
         AF.createPattern(DF.variable('s'), DF.namedNode('p'), DF.variable('o'), DF.variable('g')),
         ctx,
       );
-      await expect(data).toEqualBindingsStream([
+      await expect(arrayifyStream(data)).resolves.toBeIsomorphicBindingsArray([
         BF.fromRecord({
           s: DF.namedNode('s1'),
           o: DF.namedNode('o1'),
