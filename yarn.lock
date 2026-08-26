@@ -4676,10 +4676,10 @@
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.2.tgz#5950e50960793055845e956c427fc2b0d70c5239"
   integrity sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==
 
-"@types/readable-stream@4.0.20":
-  version "4.0.20"
-  resolved "https://registry.yarnpkg.com/@types/readable-stream/-/readable-stream-4.0.20.tgz#6104b683b4c4db12157b13dca74482b407c58dca"
-  integrity sha512-eLgbR5KwUh8+6pngBDxS32MymdCsCHnGtwHTrC0GDorbc7NbcnkZAWptDLgZiRk9VRas+B6TyRgPDucq4zRs8g==
+"@types/readable-stream@4.0.24", "@types/readable-stream@^4.0.0", "@types/readable-stream@^4.0.15":
+  version "4.0.24"
+  resolved "https://registry.yarnpkg.com/@types/readable-stream/-/readable-stream-4.0.24.tgz#7b2431bfc1367d05c53598ad36094b044726d442"
+  integrity sha512-NRvUNC/JFGPJvqdAfEve8oginbM6V08u5NzLWpG8MwA2kTPOLnqk+wpwuPT+mp3aUsxyuT6m2gnrPuHYCruzEg==
   dependencies:
     "@types/node" "*"
 
@@ -4690,13 +4690,6 @@
   dependencies:
     "@types/node" "*"
     safe-buffer "~5.1.1"
-
-"@types/readable-stream@^4.0.0", "@types/readable-stream@^4.0.15":
-  version "4.0.24"
-  resolved "https://registry.yarnpkg.com/@types/readable-stream/-/readable-stream-4.0.24.tgz#7b2431bfc1367d05c53598ad36094b044726d442"
-  integrity sha512-NRvUNC/JFGPJvqdAfEve8oginbM6V08u5NzLWpG8MwA2kTPOLnqk+wpwuPT+mp3aUsxyuT6m2gnrPuHYCruzEg==
-  dependencies:
-    "@types/node" "*"
 
 "@types/semver@^7.3.12", "@types/semver@^7.3.4":
   version "7.5.6"
