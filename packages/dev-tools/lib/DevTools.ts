@@ -36,7 +36,7 @@ import type { Quad } from '@incremunica/types';
 import type * as RDF from '@rdfjs/types';
 import { AsyncIterator } from 'asynciterator';
 import MurmurHash3 from 'imurmurhash';
-import { LRUCache } from 'lru-cache';
+import LRUCache from 'lru-cache';
 import { DataFactory } from 'rdf-data-factory';
 import { Algebra, Factory } from 'sparqlalgebrajs';
 import { Wildcard } from 'sparqljs';

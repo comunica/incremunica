@@ -1,0 +1,5 @@
+yarn run lint-no-cache
+yarn run build
+yarn run depcheck
+yarn run test-browser-chrome
+yarn run test

@@ -17,11 +17,11 @@ import {
 } from '@incremunica/dev-tools';
 import { DataFactory } from 'rdf-data-factory';
 import { Factory } from 'sparqlalgebrajs';
+import { streamifyArray } from 'streamify-array';
 import { ActorQuerySourceIdentifyHypermediaNone } from '../lib';
 
 const DF = new DataFactory();
 const AF = new Factory();
-const streamifyArray = require('streamify-array');
 
 function captureEvents(item: EventEmitter, ...events: string[]) {
   const counts = (<any>item)._eventCounts = Object.create(null);

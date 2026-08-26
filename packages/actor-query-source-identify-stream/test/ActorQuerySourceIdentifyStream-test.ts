@@ -38,13 +38,13 @@ import type { IQuerySourceStreamElement, Quad } from '@incremunica/types';
 import { ArrayIterator, AsyncIterator, wrap } from 'asynciterator';
 import { Store } from 'n3';
 import { PassThrough } from 'readable-stream';
+import { streamifyArray } from 'streamify-array';
 import { ActorQuerySourceIdentifyStream } from '../lib';
 import 'jest-rdf';
 import '@comunica/utils-jest';
 import { StreamingQuerySourceStream } from '../lib/StreamingQuerySourceStream';
 
 const quad = require('rdf-quad');
-const streamifyArray = require('streamify-array');
 
 // @ts-expect-error
 const mediatorDereferenceRdf: MediatorDereferenceRdf = {
@@ -116,7 +116,7 @@ const mediatorRdfMetadataAccumulate: MediatorRdfMetadataAccumulate = {
 const mediatorQuerySourceIdentifyHypermedia: MediatorQuerySourceIdentifyHypermedia = {
   async mediate({ quads }: IActionQuerySourceIdentifyHypermedia) {
     const store = new Store();
-    store.import(quads);
+    await store.import(quads);
     return {
       dataset: 'MYDATASET',
       source: <IQuerySource> <any> {
