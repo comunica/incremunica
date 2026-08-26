@@ -5582,10 +5582,10 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-avl@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/avl/-/avl-1.5.3.tgz#c1fedf023926fa598f23c9d65481b375af6c328a"
-  integrity sha512-1qcOJeREIosJxIBof2nefabU9+Y3wCxXBb3ElQmNVOHP+Hu2BLWAh8CpU7xFnJNDMVBt2H5UOE2S/B7MEqhTsg==
+avl@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/avl/-/avl-2.0.0.tgz#9e59284b9e6a995edd90a9258f950a0e5e6c0aac"
+  integrity sha512-imPAgmVrjf2kRru+U9brsmAfVYVbIGPTqGFSouYfPEJZSv2FvitwGb1HjqANuAPtnabWoteHv4xEWkKIPB10mA==
 
 axios@1.18.1:
   version "1.18.1"

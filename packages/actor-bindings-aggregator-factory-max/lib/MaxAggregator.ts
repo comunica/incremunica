@@ -3,7 +3,7 @@ import type { IExpressionEvaluator } from '@comunica/types';
 import type { IBindingsAggregator } from '@incremunica/bus-bindings-aggregator-factory';
 import { AggregateEvaluator } from '@incremunica/bus-bindings-aggregator-factory';
 import type * as RDF from '@rdfjs/types';
-import AVLTree from 'avl';
+import { AVLTree } from 'avl';
 import type { Term } from 'n3';
 import { termToString } from 'rdf-string';
 
