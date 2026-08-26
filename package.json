@@ -85,7 +85,7 @@
     "typedoc": "^0.28.0",
     "typescript": "^5.0.0",
     "webpack": "^5.88.2",
-    "webpack-cli": "^6.0.0",
+    "webpack-cli": "^7.0.0",
     "ws": "^8.18.0"
   },
   "resolutions": {
