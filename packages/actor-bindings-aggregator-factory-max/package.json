@@ -42,8 +42,8 @@
     "@comunica/types": "^4.2.0",
     "@incremunica/bus-bindings-aggregator-factory": "^2.3.2",
     "@rdfjs/types": "*",
-    "avl": "^1.5.3",
-    "n3": "^1.23.0",
+    "avl": "^2.0.0",
+    "n3": "^2.0.0",
     "rdf-string": "^2.0.1"
   }
 }

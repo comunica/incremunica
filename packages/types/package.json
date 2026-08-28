@@ -37,7 +37,7 @@
     "@comunica/types": "^4.2.0",
     "@rdfjs/types": "*",
     "asynciterator": "^3.9.0",
-    "n3": "^1.16.3",
+    "n3": "^2.0.0",
     "readable-stream": "^4.7.0"
   }
 }

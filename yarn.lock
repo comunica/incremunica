@@ -4654,12 +4654,12 @@
   dependencies:
     undici-types "~5.26.4"
 
-"@types/node@^22.13.1":
-  version "22.13.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.13.1.tgz#a2a3fefbdeb7ba6b89f40371842162fac0934f33"
-  integrity sha512-jK8uzQlrvXqEU91UxiK5J7pKHyzgnI1Qnl0QDHIgVGuolJhRb9EEl28Cj9b3rGR8B2lhFCtvIm5os8lFnO/1Ew==
+"@types/node@^24.0.0":
+  version "24.13.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.13.3.tgz#49f18bd3c647866dcda51a0756c145e14590ce16"
+  integrity sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==
   dependencies:
-    undici-types "~6.20.0"
+    undici-types "~7.18.0"
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.4"
@@ -5567,10 +5567,10 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-avl@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/avl/-/avl-1.5.3.tgz#c1fedf023926fa598f23c9d65481b375af6c328a"
-  integrity sha512-1qcOJeREIosJxIBof2nefabU9+Y3wCxXBb3ElQmNVOHP+Hu2BLWAh8CpU7xFnJNDMVBt2H5UOE2S/B7MEqhTsg==
+avl@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/avl/-/avl-2.0.0.tgz#9e59284b9e6a995edd90a9258f950a0e5e6c0aac"
+  integrity sha512-imPAgmVrjf2kRru+U9brsmAfVYVbIGPTqGFSouYfPEJZSv2FvitwGb1HjqANuAPtnabWoteHv4xEWkKIPB10mA==
 
 axios@1.18.1:
   version "1.18.1"
@@ -11355,19 +11355,18 @@ n3@^1.16.3, n3@^1.17.0, n3@^1.17.1:
     queue-microtask "^1.1.2"
     readable-stream "^4.0.0"
 
-n3@^1.23.0:
-  version "1.23.0"
-  resolved "https://registry.yarnpkg.com/n3/-/n3-1.23.0.tgz#463d6da406ae03d2534d3404dae777c7773483f8"
-  integrity sha512-JEbhFlxFTNsHTHUAGykRoVNRG4Sqsu8Wn+SXq99l9pRQPgqJzvY4CwNp/yxRGwb4oni9BT5sH5kevnbVUIUvkQ==
-  dependencies:
-    buffer "^6.0.3"
-    queue-microtask "^1.1.2"
-    readable-stream "^4.0.0"
-
 n3@^1.26.0:
   version "1.26.0"
   resolved "https://registry.yarnpkg.com/n3/-/n3-1.26.0.tgz#3d69de04bee680b9ebec9dbc1033dc1e6934d351"
   integrity sha512-SQknS0ua90rN+3RHuk8BeIqeYyqIH/+ecViZxX08jR4j6MugqWRjtONl3uANG/crWXnOM2WIqBJtjIhVYFha+w==
+  dependencies:
+    buffer "^6.0.3"
+    readable-stream "^4.0.0"
+
+n3@^2.0.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/n3/-/n3-2.4.0.tgz#475aca70afb1343a1929be603cbf4cf94783a954"
+  integrity sha512-rQgwsKqGacptMSFnwRPJxTkfBcuRPd/opAc8V4uLn3/EAFz2nXQdfP2xFlQI38pzFZ/QMggxMQ60HaEVxmeLdg==
   dependencies:
     buffer "^6.0.3"
     readable-stream "^4.0.0"
@@ -13501,13 +13500,13 @@ sha.js@^2.4.0, sha.js@^2.4.8:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-shaclc-parse@1.4.3, shaclc-parse@^1.4.0:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/shaclc-parse/-/shaclc-parse-1.4.3.tgz#56de4d03408f0768bf66c70d655cff33ccae410d"
-  integrity sha512-MQJWVFjfzzMUvieFO0STWjIo49ywy63UkVSsr0e8+8xHUns6X+i3yWYxNKd+GtSEJjBNZxxrUubog+hnd7PvRA==
+shaclc-parse@2.0.0, shaclc-parse@^1.4.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/shaclc-parse/-/shaclc-parse-2.0.0.tgz#326fa50202bb5bc104c9bd10e55a9016f21431e9"
+  integrity sha512-YEznPru7QmcIR1lF/lCvvrrcjZ8vWfKBMAketPb2CRWkrA0LUffTzrW0tOepue/evUREkJyl8LeVpcmyyKF+ng==
   dependencies:
     "@rdfjs/types" "^2.0.0"
-    n3 "^1.16.3"
+    n3 "^2.0.0"
 
 shaclc-write@^1.4.2:
   version "1.4.2"
@@ -14693,10 +14692,10 @@ undici-types@~5.26.4:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
-undici-types@~6.20.0:
-  version "6.20.0"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.20.0.tgz#8171bf22c1f588d1554d55bf204bc624af388433"
-  integrity sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==
+undici-types@~7.18.0:
+  version "7.18.2"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.18.2.tgz#29357a89e7b7ca4aef3bf0fd3fd0cd73884229e9"
+  integrity sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==
 
 undici@^6.25.0:
   version "6.28.0"

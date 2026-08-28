@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "es2021",
     "lib": [
-      "es2021",
+      "es2022",
       "dom"
     ],
     "module": "commonjs",
