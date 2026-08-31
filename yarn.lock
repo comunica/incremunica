@@ -4632,10 +4632,10 @@
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.5.tgz#ec10755e871497bcd83efe927e43ec46e8c0747e"
   integrity sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==
 
-"@types/n3@*", "@types/n3@1.26.1", "@types/n3@^1.10.4":
-  version "1.26.1"
-  resolved "https://registry.yarnpkg.com/@types/n3/-/n3-1.26.1.tgz#c696b45a1bcbc37b0cf5db01e107ec9937f858fe"
-  integrity sha512-TilYHzpU6ecXVJAbV+6o17Z8ZkWLWx6ZJD3IluaU4RiGHxqjU2or9fopxFHS6iXS6qcl5Mg1K3wSx9L8xxJaJQ==
+"@types/n3@*", "@types/n3@1.26.3", "@types/n3@^1.10.4":
+  version "1.26.3"
+  resolved "https://registry.yarnpkg.com/@types/n3/-/n3-1.26.3.tgz#baee5c23ddd9bc9cdf30a3dac9d94ad5a51c99c7"
+  integrity sha512-uKEIHcOArBNmzCKDSrSgkEAC/v1h0yZWwldHI5kRnn0mMhvVHAgEpQMovowy03hV6iPpWPnq7BU6S+zg/ssXSw==
   dependencies:
     "@rdfjs/types" "*"
     "@types/node" "*"
