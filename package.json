@@ -91,7 +91,7 @@
   "resolutions": {
     "@rdfjs/types": "2.0.1",
     "@types/n3": "1.26.1",
-    "componentsjs": "6.2.0",
+    "componentsjs": "6.4.0",
     "rdf-data-factory": "^2.0.0",
     "shaclc-parse": "1.4.3",
     "sparqlalgebrajs": "^5.0.0"
