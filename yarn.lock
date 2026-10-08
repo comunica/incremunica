@@ -11355,19 +11355,18 @@ n3@^1.16.3, n3@^1.17.0, n3@^1.17.1:
     queue-microtask "^1.1.2"
     readable-stream "^4.0.0"
 
-n3@^1.23.0:
-  version "1.23.0"
-  resolved "https://registry.yarnpkg.com/n3/-/n3-1.23.0.tgz#463d6da406ae03d2534d3404dae777c7773483f8"
-  integrity sha512-JEbhFlxFTNsHTHUAGykRoVNRG4Sqsu8Wn+SXq99l9pRQPgqJzvY4CwNp/yxRGwb4oni9BT5sH5kevnbVUIUvkQ==
-  dependencies:
-    buffer "^6.0.3"
-    queue-microtask "^1.1.2"
-    readable-stream "^4.0.0"
-
 n3@^1.26.0:
   version "1.26.0"
   resolved "https://registry.yarnpkg.com/n3/-/n3-1.26.0.tgz#3d69de04bee680b9ebec9dbc1033dc1e6934d351"
   integrity sha512-SQknS0ua90rN+3RHuk8BeIqeYyqIH/+ecViZxX08jR4j6MugqWRjtONl3uANG/crWXnOM2WIqBJtjIhVYFha+w==
+  dependencies:
+    buffer "^6.0.3"
+    readable-stream "^4.0.0"
+
+n3@^2.0.0:
+  version "2.13.11"
+  resolved "https://registry.yarnpkg.com/n3/-/n3-2.13.11.tgz#29267d3a285152f69326f2cd6d373e8787693245"
+  integrity sha512-RZ+iINCXqZm4Tr6rA1/WQI573hPrwbkiWQspz5TViIWLWEs5y6+AVWoNQ7preieLhqdi9H1E+AOR+LvlhKxsOg==
   dependencies:
     buffer "^6.0.3"
     readable-stream "^4.0.0"
