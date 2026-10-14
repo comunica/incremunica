@@ -40,8 +40,8 @@
     "clean-monorepo": "yarn clean-monorepo:top-level && yarn clean-monorepo:packages && yarn clean-monorepo:engines && yarn clean-monorepo:yarn-error && yarn clean-monorepo:componentsjs-error"
   },
   "devDependencies": {
-    "@comunica/utils-jest": "^4.2.0",
-    "@comunica/utils-monorepo": "^4.0.1",
+    "@comunica/utils-jest": "^5.0.0",
+    "@comunica/utils-monorepo": "^5.0.0",
     "@playwright/test": "^1.47.2",
     "@rubensworks/eslint-config": "^3.0.0",
     "@types/jest": "^29.0.0",
